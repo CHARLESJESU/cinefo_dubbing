@@ -1,19 +1,21 @@
 import 'package:cinefo_dubbing/Screen/HomeScreen.dart';
 import 'package:flutter/material.dart';
 
-
-
 class RoutescreenforDubbingIncharge extends StatefulWidget {
   final int initialIndex;
 
-  const RoutescreenforDubbingIncharge(
-      {super.key, this.initialIndex = 0}); // Default to Home tab
+  const RoutescreenforDubbingIncharge({
+    super.key,
+    this.initialIndex = 0,
+  }); // Default to Home tab
 
   @override
-  State<RoutescreenforDubbingIncharge> createState() => _RoutescreenforDubbingInchargeState();
+  State<RoutescreenforDubbingIncharge> createState() =>
+      _RoutescreenforDubbingInchargeState();
 }
 
-class _RoutescreenforDubbingInchargeState extends State<RoutescreenforDubbingIncharge> {
+class _RoutescreenforDubbingInchargeState
+    extends State<RoutescreenforDubbingIncharge> {
   int _currentIndex = 0;
 
   @override
@@ -33,32 +35,17 @@ class _RoutescreenforDubbingInchargeState extends State<RoutescreenforDubbingInc
     return Scaffold(
       backgroundColor: Color(0xFF355E8C),
 
-      body: SafeArea(
-        child: _getScreenWidget(_currentIndex),
-      ),
-      // Align(
-      //   alignment: Alignment.bottomCenter,
-      //   child: SafeArea(
-      //     top: false,
-      //     child: SizedBox(
-      //       height: 70,
-      //       child: Stack(
-      //         children: [
+      body: SafeArea(child: _getScreenWidget(_currentIndex)),
+
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF355E8C),
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.add_circle_outline),
             label: 'Trip',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'Callsheet',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Callsheet'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Reports',
