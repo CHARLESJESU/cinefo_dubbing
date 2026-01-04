@@ -60,13 +60,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
           print('🔍 DEBUG: Final isDriver=$isDriver, isAgent=$isAgent');
 
-          if (mounted) {
-            if (!isDriver) {
+          if (mounted) { 
+            if (loginData!=null) {
               print('🔍 DEBUG: Navigating to RoutescreenforIncharge');
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const RoutescreenforDubbingIncharge()),
+                  builder: (context) => const RoutescreenforDubbingIncharge(),
+                ),
               );
             }
           }
@@ -127,7 +128,9 @@ class _SplashScreenState extends State<SplashScreen> {
     loginpassword.text = loginData['password'] ?? '';
 
     print('Loaded stored data: Manager=$managerName, Movie=$registeredMovie');
-    print('🔍 DEBUG: Converted driver value $driverValue (${driverValue.runtimeType}) to bool: $driver');
+    print(
+      '🔍 DEBUG: Converted driver value $driverValue (${driverValue.runtimeType}) to bool: $driver',
+    );
   }
 
   @override
@@ -157,10 +160,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         ],
                       ),
                       child: ClipOval(
-                        child: Image.asset(
-                          cinefo__logo,
-                          fit: BoxFit.cover,
-                        ),
+                        child: Image.asset(cinefo__logo, fit: BoxFit.cover),
                       ),
                     ),
 
@@ -168,7 +168,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
                     // App Title
                     Text(
-                      'Dancer App',
+                      'Dubbing App',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -201,4 +201,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../variables.dart';
 
@@ -14,11 +15,9 @@ class LoginApiService {
         processRequest,
         headers: <String, String>{
           'VMETID':
-              'byrZ4bZrKm09R4O7WH6SPd7tvAtGnK1/plycMSP8sD5TKI/VZR0tHBKyO/ogYUIf4Qk6HJXvgyGzg58v0xmlMoRJABt3qUUWGtnJj/EKBsrOaFFGZ6xAbf6k6/ktf2gKsruyfbF2/D7r1CFZgUlmTmubGS1oMZZTSU433swBQbwLnPSreMNi8lIcHJKR2WepQnzNkwPPXxA4/XuZ7CZqqsfO6tmjnH47GoHr7H+FC8GK24zU3AwGIpX+Yg/efeibwapkP6mAya+5BTUGtNtltGOm0q7+2EJAfNcrSTdmoDB8xBerLaNNHhwVHowNIu+8JZl2QM0F/gmVpB55cB8rqg=='
+              'byrZ4bZrKm09R4O7WH6SPd7tvAtGnK1/plycMSP8sD5TKI/VZR0tHBKyO/ogYUIf4Qk6HJXvgyGzg58v0xmlMoRJABt3qUUWGtnJj/EKBsrOaFFGZ6xAbf6k6/ktf2gKsruyfbF2/D7r1CFZgUlmTmubGS1oMZZTSU433swBQbwLnPSreMNi8lIcHJKR2WepQnzNkwPPXxA4/XuZ7CZqqsfO6tmjnH47GoHr7H+FC8GK24zU3AwGIpX+Yg/efeibwapkP6mAya+5BTUGtNtltGOm0q7+2EJAfNcrSTdmoDB8xBerLaNNHhwVHowNIu+8JZl2QM0F/gmVpB55cB8rqg==',
         },
-        body: jsonEncode(<String, String>{
-          "baseURL": baseUrl,
-        }),
+        body: jsonEncode(<String, String>{"baseURL": baseUrl}),
       );
 
       print('🌐 Base URL API Status: ${response.statusCode}');
@@ -31,7 +30,14 @@ class LoginApiService {
       };
     } catch (e) {
       print('❌ Error in fetchBaseUrl: $e');
-      return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
+      return {
+        'statusCode': 0,
+        'body': '',
+        'success': false,
+        'errorMessage': e is SocketException
+            ? 'Network issue'
+            : 'Something went wrong',
+      };
     }
   }
 
@@ -85,7 +91,14 @@ class LoginApiService {
       };
     } catch (e) {
       print('❌ Error in loginUser: $e');
-      return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
+      return {
+        'statusCode': 0,
+        'body': '',
+        'success': false,
+        'errorMessage': e is SocketException
+            ? 'Network issue'
+            : 'Something went wrong',
+      };
     }
   }
 
@@ -106,9 +119,7 @@ class LoginApiService {
               'fG5k1mWf1OZYinDoY0evBxUZghzEKbrAYeHxQXR4rxFG2XqxVC1CgDUhyUMZM7V0ivoycMFgfIQOzKbug+G+bJVI3hz8Y45cPST676lSzGbR5LukGZECqIFu19CtIdhw/5obOGs1ZGE1MwKpebWTDhsfRL6adTdCUWB3YAQ8/a8pXYx8lACaEs9Ri2D2m7d+h+fOcdQQlpdlpdwxxLAVvnee8OYE39miaxpJFULkWCJhXomrQvOZjCGFzjAF9QWZuGshGb2Xl/gOutmzxplKIc8UBSwApq+6NLuaIsHc+MknqhonpGNq5JJQRRXKMXaVYbhdWDPXQZ8QqhfFrGpDTA==',
           'VSID': vsid,
         },
-        body: jsonEncode(<String, dynamic>{
-          "vmId": vmId,
-        }),
+        body: jsonEncode(<String, dynamic>{"vmId": vmId}),
       );
 
       print('🚗 Driver Session API Status: ${response.statusCode}');
@@ -121,8 +132,74 @@ class LoginApiService {
       };
     } catch (e) {
       print('❌ Error in fetchDriverSession: $e');
-      return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
+      return {
+        'statusCode': 0,
+        'body': '',
+        'success': false,
+        'errorMessage': e is SocketException
+            ? 'Network issue'
+            : 'Something went wrong',
+      };
+    }
+  }
+
+  /// Check if user is Incharge or Not
+  /// This is an alias for fetchDriverSession with a more descriptive name
+  /// Returns session data that determines if user has incharge privileges
+  static Future<Map<String, dynamic>> checkInchargeOrNot({
+    required int vmId,
+    required String vsid,
+  }) async {
+    print('👤 Checking if user is Incharge or Not for vmId: $vmId');
+    return await fetchDriverSession(vmId: vmId, vsid: vsid);
+  }
+
+  /// Check or Raise Request API
+  static Future<Map<String, dynamic>> checkOrRaiseRequestApi({
+    required int vmId,
+    required String vsid,
+    required int projectid,
+    required int productionTypeId,
+  }) async {
+    try {
+      print(
+        '🚗 checkOrRaiseRequestApi (using checktheperson): vmid: $vmId, projectid: $projectid, productiontypeid: $productionTypeId',
+      );
+
+      final response = await http.post(
+        processSessionRequest,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'VMETID': vmetid_checktheperson,
+          'VSID': vsid,
+          'BASEURL': dancebaseurl,
+        },
+        body: jsonEncode(<String, dynamic>{
+          "vmid": vmId,
+          "projectid": projectid,
+          "productiontypeid": productionTypeId,
+          "baseUrl": dancebaseurl,
+        }),
+      );
+
+      print('🚗 checkOrRaiseRequestApi API Status: ${response.statusCode}');
+      print('🚗 checkOrRaiseRequestApi API Body: ${response.body}');
+
+      return {
+        'statusCode': response.statusCode,
+        'body': response.body,
+        'success': response.statusCode == 200,
+      };
+    } catch (e) {
+      print('❌ Error in checkOrRaiseRequestApi: $e');
+      return {
+        'statusCode': 0,
+        'body': '',
+        'success': false,
+        'errorMessage': e is SocketException
+            ? 'Network issue'
+            : 'Something went wrong',
+      };
     }
   }
 }
-

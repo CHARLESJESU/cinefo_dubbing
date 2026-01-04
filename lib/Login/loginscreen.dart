@@ -8,6 +8,8 @@ import '../variables.dart';
 import 'loginsqlitecode.dart';
 import 'dialogbox.dart';
 import 'logindataapiservice.dart';
+import '../Screen/ProjectListScreen.dart';
+import '../common/models/project_model.dart';
 
 class Loginscreen extends StatefulWidget {
   const Loginscreen({super.key});
@@ -17,7 +19,6 @@ class Loginscreen extends StatefulWidget {
 }
 
 class _LoginscreenState extends State<Loginscreen> {
-
   Future<bool> isNfcSupported() async {
     try {
       final availability = await NfcManager.instance.checkAvailability();
@@ -37,7 +38,7 @@ class _LoginscreenState extends State<Loginscreen> {
 
   Future<void> baseurl() async {
     try {
-      final apiResponse = await LoginApiService.fetchBaseUrl(dancebaseurlforproduction);
+      final apiResponse = await LoginApiService.fetchBaseUrl(dancebaseurl);
 
       if (apiResponse['success'] == true) {
         final responseBody = json.decode(apiResponse['body']);
@@ -69,7 +70,11 @@ class _LoginscreenState extends State<Loginscreen> {
         setState(() {
           _isLoading = false;
         });
-        DialogHelper.showMessage(context, "Base URL not loaded. Please try again.", "ok");
+        DialogHelper.showMessage(
+          context,
+          "Base URL not loaded. Please try again.",
+          "ok",
+        );
         return;
       }
 
@@ -79,10 +84,12 @@ class _LoginscreenState extends State<Loginscreen> {
         password: loginpassword.text,
         vpid: baseurlresult?['vpid']?.toString() ?? '',
         vptemplateId: baseurlresult?['vptemplteID']?.toString() ?? '',
-        baseUrl: dancebaseurlforproduction,
+        baseUrl: dancebaseurl,
       );
 
-      print("Login HTTP status:📊📊📊📊📊📊📊📊📊📊📊📊📊📊📊hvjhjvkjhgvhjgjmnvbkjgjbvn📊 ${apiResponse['statusCode']}");
+      print(
+        "Login HTTP status:📊📊📊📊📊📊📊📊📊📊📊📊📊📊📊hvjhjvkjhgvhjgjmnvbkjgjbvn📊 ${apiResponse['statusCode']}",
+      );
 
       setState(() {
         _isLoading = false;
@@ -96,13 +103,15 @@ class _LoginscreenState extends State<Loginscreen> {
 
           if (responseBody['responseData'] != null) {
             print(
-                "📊 ResponseData keys: ${responseBody['responseData'].keys.toList()}");
+              "📊 ResponseData keys: ${responseBody['responseData'].keys.toList()}",
+            );
             print("📊 ResponseData content: ${responseBody['responseData']}");
 
             // Check if profileImage exists in responseData
             if (responseBody['responseData']['profileImage'] != null) {
               print(
-                  "📸 ProfileImage found in responseData: ${responseBody['responseData']['profileImage']}");
+                "📸 ProfileImage found in responseData: ${responseBody['responseData']['profileImage']}",
+              );
             } else {
               print("⚠️ ProfileImage NOT found in responseData");
             }
@@ -134,7 +143,8 @@ class _LoginscreenState extends State<Loginscreen> {
               String? loginProfileImage;
               if (responseBody['responseData'] is Map &&
                   responseBody['responseData']['profileImage'] != null) {
-                loginProfileImage = responseBody['responseData']['profileImage'];
+                loginProfileImage =
+                    responseBody['responseData']['profileImage'];
               } else if (responseBody['responseData'] is List &&
                   (responseBody['responseData'] as List).isNotEmpty) {
                 final firstItem = (responseBody['responseData'] as List)[0];
@@ -162,13 +172,15 @@ class _LoginscreenState extends State<Loginscreen> {
               final int? _unitid = loginresponsebody?['unitid'];
 
               // If unitid == 18 => Agent
-              if (_unitid == 5) {
+              if (_unitid == 52) {
                 // Save login data for drivers/agents only
                 try {
                   print(
-                      '🔄 unitid is ${_unitid} — saving login data to SQLite...');
+                    '🔄 unitid is ${_unitid} — saving login data to SQLite...',
+                  );
                   await LoginSQLiteHelper.saveLoginData(
-                    loginresponsebody: loginresponsebody as Map<String, dynamic>?,
+                    loginresponsebody:
+                        loginresponsebody as Map<String, dynamic>?,
                     loginresult: loginresult,
                     mobileNumber: loginmobilenumber.text,
                     password: loginpassword.text,
@@ -176,94 +188,188 @@ class _LoginscreenState extends State<Loginscreen> {
                   );
                 } catch (e) {
                   print(
-                      '❌ Error while saving login data for unitid ${_unitid}: $e');
+                    '❌ Error while saving login data for unitid ${_unitid}: $e',
+                  );
                 }
                 // Make additional HTTP request for drivers
                 try {
                   print(
-                      '🚗 User is a driver (unitid == 9), making additional request...');
-
-                  final driverApiResponse = await LoginApiService.fetchDriverSession(
-                    vmId: loginresponsebody?['responseData']?['vmid'] ?? 0,
-                    vsid: loginresponsebody?['vsid']?.toString() ?? "",
+                    '� Checking if user is Incharge or Not (unitid == 5)...',
                   );
 
+                  // Call InchargeOrNot API after successful login
+                  final inchargeApiResponse =
+                      await LoginApiService.checkInchargeOrNot(
+                        vmId: loginresponsebody?['responseData']?['vmid'] ?? 0,
+                        vsid: loginresponsebody?['vsid']?.toString() ?? "",
+                      );
+
                   vsid = loginresponsebody?['vsid']?.toString() ?? "";
-                  print('🚗 Driver HTTP Response Status: ${driverApiResponse['statusCode']}');
-                  print('🚗 Driver HTTP Response Body: ${driverApiResponse['body']}');
+                  print(
+                    '� InchargeOrNot API Response Status: ${inchargeApiResponse['statusCode']}',
+                  );
+                  print(
+                    '� InchargeOrNot API Response Body: ${inchargeApiResponse['body']}',
+                  );
 
-                  if (driverApiResponse['success'] == true) {
+                  if (inchargeApiResponse['success'] == true) {
                     try {
-                      final driverResponseBody = json.decode(driverApiResponse['body']);
-                      print('🚗 Driver Response JSON: $driverResponseBody');
+                      final inchargeResponseBody = json.decode(
+                        inchargeApiResponse['body'],
+                      );
                       print(
-                          '🚗 Driver Response Keys: ${driverResponseBody.keys.toList()}');
+                        '� InchargeOrNot Response JSON: $inchargeResponseBody',
+                      );
+                      print(
+                        '� InchargeOrNot Response Keys: ${inchargeResponseBody.keys.toList()}',
+                      );
 
-                      // Update SQLite with driver response data - Access nested responseData
-                      final responseData = driverResponseBody['responseData'];
+                      // Update SQLite with incharge response data - Access nested responseData
+                      dynamic responseData =
+                          inchargeResponseBody['responseData'];
+                      Map<String, dynamic> responseDataMap = {};
+
+                      if (responseData is List && responseData.isNotEmpty) {
+                        try {
+                          responseDataMap =
+                              responseData[0] as Map<String, dynamic>;
+                        } catch (e) {
+                          print(
+                            "Error casting responseData list element to map: $e",
+                          );
+                        }
+                      } else if (responseData is Map) {
+                        responseDataMap = responseData as Map<String, dynamic>;
+                      }
+
                       final projectName =
-                          responseData?['projectName']?.toString() ?? '';
+                          responseDataMap['projectName']?.toString() ?? '';
                       final projectId =
-                          responseData?['projectId']?.toString() ?? '';
+                          responseDataMap['projectId']?.toString() ?? '';
                       final productionHouse =
-                          responseData?['productionHouse']?.toString() ?? '';
+                          responseDataMap['productionHouse']?.toString() ?? '';
                       final productionTypeId =
-                          responseData?['productionTypeId'] ?? 0;
+                          responseDataMap['productionTypeId'] ??
+                          0; // Assuming int
 
-                      print('🔍 Extracted values from responseData:');
+                      dynamic rawVmid =
+                          responseDataMap['vmid'] ?? responseDataMap['vmId'];
+                      int vmidVal = 0;
+                      if (rawVmid is int) {
+                        vmidVal = rawVmid;
+                      } else if (rawVmid is String) {
+                        vmidVal = int.tryParse(rawVmid) ?? 0;
+                      }
+
+                      print(
+                        '🔍 Extracted values from InchargeOrNot responseData:',
+                      );
                       print('🔍 projectName: "$projectName"');
                       print('🔍 projectId: "$projectId"');
                       print('🔍 productionHouse: "$productionHouse"');
-                      print('🔍 productionHouse: "$productionTypeId"');
+                      print('🔍 productionTypeId: "$productionTypeId"');
+                      print('🔍 vmid: "$vmidVal"');
 
                       // Always try to update, even with empty values for testing
-                      print('🚗 Attempting SQLite update...');
-                      await LoginSQLiteHelper.updateDriverLoginData(projectName, projectId,
-                          productionHouse, productionTypeId);
-                      print('🚗 SQLite update call completed');
+                      print(' Attempting SQLite update...');
+                      await LoginSQLiteHelper.updateDriverLoginData(
+                        projectName,
+                        projectId,
+                        productionHouse,
+                        productionTypeId,
+                        vmidVal,
+                      );
+                      print('� SQLite update call completed');
 
                       if (projectName.isNotEmpty ||
                           projectId.isNotEmpty ||
                           productionHouse.isNotEmpty) {
-                        print('🚗 Updated SQLite with driver response data');
+                        print('✅ Updated SQLite with incharge response data');
                       } else {
                         print(
-                            '⚠️ All driver data fields are empty, but update was attempted');
+                          '⚠️ All incharge data fields are empty, but update was attempted',
+                        );
                       }
 
                       // Conditional navigation based on responseData content
-                      if (driverResponseBody['responseData'] != null &&
-                          driverResponseBody['responseData'].toString() !=
+                      if (inchargeResponseBody['responseData'] != null &&
+                          inchargeResponseBody['responseData'].toString() !=
                               '{}' &&
-                          _unitid == 9 &&
-                          driverResponseBody['responseData']
+                          inchargeResponseBody['responseData']
                               .toString()
                               .isNotEmpty) {
                         print(
-                            '🚗 ResponseData is not empty and unitid is 9, navigating to RoutescreenforIncharge');
+                          '✅ User is confirmed as Incharge, preparing project list',
+                        );
+
+                        // Parse the response data into a list of ProjectData
+                        // The API might return a single object or a list
+                        List<ProjectData> projects = [];
+                        final responseData =
+                            inchargeResponseBody['responseData'];
+
+                        if (responseData is List) {
+                          // If responseData is a list, convert each item to ProjectData
+                          projects = responseData
+                              .map(
+                                (item) => ProjectData.fromJson(
+                                  item as Map<String, dynamic>,
+                                ),
+                              )
+                              .toList();
+                          print(
+                            '📋 Parsed ${projects.length} projects from API response',
+                          );
+                        } else if (responseData is Map) {
+                          // If it's a single object, wrap it in a list
+                          projects = [
+                            ProjectData.fromJson(
+                              responseData as Map<String, dynamic>,
+                            ),
+                          ];
+                          print('📋 Parsed 1 project from API response');
+                        }
 
                         // Update driver field to false for incharge
                         await LoginSQLiteHelper.updateDriverField(false);
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  const RoutescreenforDubbingIncharge()
-                              // const Routescreenfordriver()
+                        // Navigate to ProjectListScreen
+                        if (mounted) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProjectListScreen(
+                                projects: projects,
+                                onProjectSelected: () {
+                                  // After project selection, navigate to the main route
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RoutescreenforDubbingIncharge(),
+                                    ),
+                                    (route) => false,
+                                  );
+                                },
                               ),
-                        );
+                            ),
+                          );
+                        }
+                      } else {
+                        print('❌ Invalid or empty responseData');
                       }
                     } catch (e) {
-                      print('❌ Error processing driver response JSON: $e');
+                      print(
+                        '❌ Error processing InchargeOrNot response JSON: $e',
+                      );
                     }
                   } else {
                     print(
-                        '❌ Driver response status code: ${driverApiResponse['statusCode']}');
+                      '❌ InchargeOrNot response status code: ${inchargeApiResponse['statusCode']}',
+                    );
                   }
                 } catch (e) {
-                  print('❌ Error in driver HTTP request: $e');
-
+                  print('❌ Error in InchargeOrNot API request: $e');
                 }
               } else {
                 // Show dialog for non-driver users
@@ -271,11 +377,19 @@ class _LoginscreenState extends State<Loginscreen> {
               }
             }
           } else {
-            DialogHelper.showMessage(context, "Invalid response from server", "ok");
+            DialogHelper.showMessage(
+              context,
+              "Invalid response from server",
+              "ok",
+            );
           }
         } catch (e) {
           print("Error parsing login response: $e");
-          DialogHelper.showMessage(context, "Failed to process login response", "ok");
+          DialogHelper.showMessage(
+            context,
+            "Failed to process login response",
+            "ok",
+          );
         }
       } else {
         try {
@@ -284,7 +398,10 @@ class _LoginscreenState extends State<Loginscreen> {
             loginresponsebody = errorBody;
           });
           DialogHelper.showMessage(
-              context, errorBody?['errordescription'] ?? "Login failed", "ok");
+            context,
+            errorBody?['errordescription'] ?? "Login failed",
+            "ok",
+          );
         } catch (e) {
           print("Error parsing error response: $e");
           DialogHelper.showMessage(context, "Login failed", "ok");
@@ -296,7 +413,11 @@ class _LoginscreenState extends State<Loginscreen> {
       setState(() {
         _isLoading = false;
       });
-      DialogHelper.showMessage(context, "Network error. Please try again.", "ok");
+      DialogHelper.showMessage(
+        context,
+        "Network error. Please try again.",
+        "ok",
+      );
     }
   }
 
@@ -337,7 +458,6 @@ class _LoginscreenState extends State<Loginscreen> {
     return Scaffold(
       // Remove the extra AppBar so the background gradient can fill the
       // entire screen. Make the scaffold itself transparent.
-
       body: Stack(
         children: [
           // Subtle background overlay
@@ -387,7 +507,7 @@ class _LoginscreenState extends State<Loginscreen> {
                       Text(
                         // 'Agent Login',
                         // 'Driver Login',
-                        'Dancer Login',
+                        'Dubbing Login',
                         // 'Setting Login',
                         style: TextStyle(
                           fontSize: screenWidth * 0.055,
@@ -404,7 +524,8 @@ class _LoginscreenState extends State<Loginscreen> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.07),
+                          horizontal: screenWidth * 0.07,
+                        ),
                         child: Card(
                           elevation: 8,
                           shape: RoundedRectangleBorder(
@@ -432,8 +553,10 @@ class _LoginscreenState extends State<Loginscreen> {
                                   keyboardType: TextInputType.phone,
                                   decoration: InputDecoration(
                                     labelText: 'Mobile Number',
-                                    prefixIcon: Icon(Icons.phone,
-                                        color: Color(0xFF164AE9)),
+                                    prefixIcon: Icon(
+                                      Icons.phone,
+                                      color: Color(0xFF164AE9),
+                                    ),
                                     labelStyle: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
@@ -451,8 +574,10 @@ class _LoginscreenState extends State<Loginscreen> {
                                   obscureText: _obscureText,
                                   decoration: InputDecoration(
                                     labelText: 'Password',
-                                    prefixIcon: Icon(Icons.lock,
-                                        color: Color(0xFF164AE9)),
+                                    prefixIcon: Icon(
+                                      Icons.lock,
+                                      color: Color(0xFF164AE9),
+                                    ),
                                     labelStyle: TextStyle(
                                       fontSize: 15,
                                       fontWeight: FontWeight.w500,
@@ -502,23 +627,29 @@ class _LoginscreenState extends State<Loginscreen> {
                                         : () {
                                             loginr();
                                           },
-                                    style: ElevatedButton.styleFrom(
-                                      elevation: 4,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      padding: EdgeInsets.zero,
-                                      backgroundColor: null,
-                                    ).copyWith(
-                                      backgroundColor: WidgetStateProperty
-                                          .resolveWith<Color?>((states) {
-                                        if (states
-                                            .contains(WidgetState.disabled)) {
-                                          return Colors.grey[400];
-                                        }
-                                        return null;
-                                      }),
-                                    ),
+                                    style:
+                                        ElevatedButton.styleFrom(
+                                          elevation: 4,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.zero,
+                                          backgroundColor: null,
+                                        ).copyWith(
+                                          backgroundColor:
+                                              WidgetStateProperty.resolveWith<
+                                                Color?
+                                              >((states) {
+                                                if (states.contains(
+                                                  WidgetState.disabled,
+                                                )) {
+                                                  return Colors.grey[400];
+                                                }
+                                                return null;
+                                              }),
+                                        ),
                                     child: Ink(
                                       decoration: BoxDecoration(
                                         gradient: LinearGradient(
@@ -550,8 +681,10 @@ class _LoginscreenState extends State<Loginscreen> {
                                                     ),
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Icon(Icons.login,
-                                                      color: Colors.white),
+                                                  Icon(
+                                                    Icons.login,
+                                                    color: Colors.white,
+                                                  ),
                                                 ],
                                               ),
                                       ),

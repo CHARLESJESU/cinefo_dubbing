@@ -9,12 +9,14 @@ TextEditingController loginpassword = TextEditingController();
 
 Map? loginresult;
 Map? loginresponsebody;
+Map<String, dynamic>? globalloginData;
 bool isoffline = false;
 
 // Production and Project related
 String? productionHouse;
 String? projectId;
 String? managerName;
+String? designation;
 String? registeredMovie;
 int? productionTypeId;
 List<dynamic> movieProjects = [];
@@ -42,6 +44,7 @@ bool? driver;
 int? callsheetid;
 
 // Unit IDs for configuration
+int agentunitid = 18;
 int lightman_unitid = 4;
 int production_unitid = 20;
 int tech_unitid = 29;
@@ -80,7 +83,8 @@ String vmetid_login =
 String vmetid_checktheperson =
     'fG5k1mWf1OZYinDoY0evBxUZghzEKbrAYeHxQXR4rxFG2XqxVC1CgDUhyUMZM7V0ivoycMFgfIQOzKbug+G+bJVI3hz8Y45cPST676lSzGbR5LukGZECqIFu19CtIdhw/5obOGs1ZGE1MwKpebWTDhsfRL6adTdCUWB3YAQ8/a8pXYx8lACaEs9Ri2D2m7d+h+fOcdQQlpdlpdwxxLAVvnee8OYE39miaxpJFULkWCJhXomrQvOZjCGFzjAF9QWZuGshGb2Xl/gOutmzxplKIc8UBSwApq+6NLuaIsHc+MknqhonpGNq5JJQRRXKMXaVYbhdWDPXQZ8QqhfFrGpDTA==';
 // Base URLs for different environments
-String dancebaseurlfordev = "drivermember.cinefo.club";
+String dancebaseurl = "dubbingmember.cinefo.club";
+String dancebaseurlfordev = "dubbingmember.cinefo.club";
 String dancebaseurlforproduction = "driversmember.cinefo.com";
 
 String cinefoagent = 'assets/cine agent.png';
@@ -94,3 +98,10 @@ String setting__logo = 'assets/Setting_Union_Logo.png';
 // Global RouteObserver used by pages that implement RouteAware to refresh on navigation
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
+
+// Global key to show SnackBars from non-UI code (e.g. API helpers)
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
+// Global key for navigation from non-UI code (e.g. API helpers for session expiration)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
