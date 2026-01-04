@@ -1,5 +1,7 @@
-import 'package:cinefo_dubbing/Screen/HomeScreen.dart';
 import 'package:flutter/material.dart';
+import '../Screen/HomeScreen.dart';
+import '../Screen/report/Reportforcallsheet.dart';
+import '../Screen/callsheet/callsheet.dart';
 
 class RoutescreenforDubbingIncharge extends StatefulWidget {
   final int initialIndex;
@@ -41,19 +43,11 @@ class _RoutescreenforDubbingInchargeState
         backgroundColor: Color(0xFF355E8C),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            label: 'Trip',
-          ),
           BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Callsheet'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Reports',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.trip_origin),
-          //   label: 'Trip',
-          // ),
         ],
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
@@ -68,9 +62,11 @@ class _RoutescreenforDubbingInchargeState
   Widget _getScreenWidget(int index) {
     switch (index) {
       case 0:
-        // return const MovieListScreen();
         return const MyHomeScreen();
-
+      case 1:
+        return const CallsheetScreen(); // Mapping Callsheet list tab
+      case 2:
+        return const Reportforcallsheet(); // Mapping Reports tab
       default:
         return const MyHomeScreen();
     }

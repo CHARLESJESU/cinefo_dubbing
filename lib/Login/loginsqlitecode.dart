@@ -60,7 +60,8 @@ class LoginSQLiteHelper {
         if (!columnNames.contains('isAgentt')) {
           print('🔧 Adding missing column isAgentt to login_data table');
           await db.execute(
-              'ALTER TABLE login_data ADD COLUMN isAgentt INTEGER DEFAULT 0');
+            'ALTER TABLE login_data ADD COLUMN isAgentt INTEGER DEFAULT 0',
+          );
           print('✅ Column isAgentt added');
         }
       } catch (e) {
@@ -76,7 +77,10 @@ class LoginSQLiteHelper {
   // Create database and login table (with profile_image field)
   static Future<Database> _initDatabase() async {
     try {
-      String dbPath = path.join(await getDatabasesPath(), 'dubbing_login.db');
+      String dbPath = path.join(
+        await getDatabasesPath(),
+        'production_login.db',
+      );
       print('📍 Database path: $dbPath');
 
       final db = await openDatabase(
@@ -98,8 +102,9 @@ class LoginSQLiteHelper {
       );
 
       // Test database connectivity
-      final tables = await db
-          .rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
+      final tables = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table'",
+      );
       print('📋 Available tables: $tables');
 
       return db;
@@ -170,15 +175,18 @@ class LoginSQLiteHelper {
 
       // Extract commonly-used fields robustly
       final extractedSubUnitName = safeString(
-          _getFromResponse('subUnitName') ?? _getFromResponse('subunitName'));
+        _getFromResponse('subUnitName') ?? _getFromResponse('subunitName'),
+      );
       final extractedProfileImage = safeString(
-          _getFromResponse('profileImage') ??
-              _getFromResponse('profile_image') ??
-              profileImage);
+        _getFromResponse('profileImage') ??
+            _getFromResponse('profile_image') ??
+            profileImage,
+      );
 
       // Numeric fields handled safely
-      final extractedVmid =
-          safeInt(_getFromResponse('vmid') ?? _getFromResponse('VMID'));
+      final extractedVmid = safeInt(
+        _getFromResponse('vmid') ?? _getFromResponse('VMID'),
+      );
       final extractedVuid = safeInt(_getFromResponse('vuid'));
       final extractedVbpid = safeInt(_getFromResponse('vbpid'));
       final extractedVcid = safeInt(_getFromResponse('vcid'));
@@ -191,7 +199,8 @@ class LoginSQLiteHelper {
       final extractedUnitid = safeInt(_getFromResponse('unitid'));
       final extractedSubunitid = safeInt(_getFromResponse('subunitid'));
       // production_type could be string sometimes
-      final productionTypeVal = _getFromResponse('production_type_id') ??
+      final productionTypeVal =
+          _getFromResponse('production_type_id') ??
           _getFromResponse('productionTypeId');
       final extractedProductionTypeId = safeInt(productionTypeVal);
 
@@ -209,26 +218,35 @@ class LoginSQLiteHelper {
         }
 
         final loginData = {
-          'manager_name': safeString(_getFromResponse('fname') ??
-              _getFromResponse('manager_name') ??
-              _getFromResponse('managerName')),
+          'manager_name': safeString(
+            _getFromResponse('fname') ??
+                _getFromResponse('manager_name') ??
+                _getFromResponse('managerName'),
+          ),
           'profile_image': extractedProfileImage,
-          'registered_movie': safeString(_getFromResponse('projectName') ??
-              _getFromResponse('registered_movie')),
+          'registered_movie': safeString(
+            _getFromResponse('projectName') ??
+                _getFromResponse('registered_movie'),
+          ),
           'mobile_number': mobileNumber,
           'subUnitName': extractedSubUnitName,
           'password': password,
           'project_id': safeString(
-              _getFromResponse('projectId') ?? _getFromResponse('projectid')),
+            _getFromResponse('projectId') ?? _getFromResponse('projectid'),
+          ),
           'production_type_id': extractedProductionTypeId,
-          'production_house': safeString(_getFromResponse('productionHouse') ??
-              _getFromResponse('production_house')),
+          'production_house': safeString(
+            _getFromResponse('productionHouse') ??
+                _getFromResponse('production_house'),
+          ),
           'vmid': extractedVmid,
           'login_date': DateTime.now().toIso8601String(),
           'vsid': safeString(
-              _getFromResponse('vsid') ?? loginresponsebody?['vsid']),
-          'vpid':
-              safeString(_getFromResponse('vpid') ?? _getFromResponse('VPID')),
+            _getFromResponse('vsid') ?? loginresponsebody?['vsid'],
+          ),
+          'vpid': safeString(
+            _getFromResponse('vpid') ?? _getFromResponse('VPID'),
+          ),
           'vuid': extractedVuid,
           'vbpid': extractedVbpid,
           'vcid': extractedVcid,
@@ -236,7 +254,8 @@ class LoginSQLiteHelper {
           'vpoid': extractedVpoid,
           'mtypeId': extractedMtypeId,
           'unitName': safeString(
-              _getFromResponse('unitName') ?? _getFromResponse('unitname')),
+            _getFromResponse('unitName') ?? _getFromResponse('unitname'),
+          ),
           'vmTypeId': extractedVmTypeId,
           'idcardurl': safeString(_getFromResponse('idcardurl')),
           'vpidpo': extractedVpidpo,
@@ -255,7 +274,8 @@ class LoginSQLiteHelper {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
         print(
-            '🎉 FIRST USER login data saved to SQLite successfully with ID: $insertResult');
+          '🎉 FIRST USER login data saved to SQLite successfully with ID: $insertResult',
+        );
       });
 
       final savedData = await getActiveLoginData();
@@ -302,7 +322,8 @@ class LoginSQLiteHelper {
 
       if (maps.isNotEmpty) {
         print(
-            '👤 First user found: ${maps.first['manager_name']} (${maps.first['mobile_number']})');
+          '👤 First user found: ${maps.first['manager_name']} (${maps.first['mobile_number']})',
+        );
         return maps.first;
       }
       print('🔍 No users found in database');
@@ -325,7 +346,8 @@ class LoginSQLiteHelper {
 
       // Test table existence
       final tables = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='login_data'");
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='login_data'",
+      );
       print('🔍 Login table exists: ${tables.isNotEmpty}');
 
       if (tables.isNotEmpty) {
@@ -346,12 +368,14 @@ class LoginSQLiteHelper {
     String projectId,
     String productionHouse,
     int productionTypeId,
+    int vmid,
   ) async {
     print('🔄 updateDriverLoginData called');
     print('🔍 Input values:');
     print('  projectName: "$projectName"');
     print('  projectId: "$projectId"');
     print('  productionHouse: "$productionHouse"');
+    print('  vmid: "$vmid"');
 
     try {
       print('🔄 Getting database connection...');
@@ -381,6 +405,7 @@ class LoginSQLiteHelper {
             'project_id': projectId,
             'production_house': productionHouse,
             'production_type_id': productionTypeId,
+            'vmid': vmid,
           },
           where: 'id = ?',
           whereArgs: [userId],
@@ -460,13 +485,15 @@ class LoginSQLiteHelper {
       final firstUser = await getFirstUserData();
       if (firstUser != null) {
         print(
-            '🗑️ Clearing first user: ${firstUser['manager_name']} (${firstUser['mobile_number']})');
+          '🗑️ Clearing first user: ${firstUser['manager_name']} (${firstUser['mobile_number']})',
+        );
       }
 
       // Delete all records (reset for new first user)
       await db.delete('login_data');
       print(
-          '✅ First user login data cleared successfully - Ready for new first user registration');
+        '✅ First user login data cleared successfully - Ready for new first user registration',
+      );
     } catch (e) {
       print('❌ Error clearing login data: $e');
     }
@@ -481,4 +508,3 @@ class LoginSQLiteHelper {
     }
   }
 }
-
