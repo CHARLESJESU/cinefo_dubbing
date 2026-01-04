@@ -16,6 +16,7 @@ class MyHomeScreen extends StatefulWidget {
 
 class _MyHomeScreenState extends State<MyHomeScreen> {
   String? _managerName;
+  String? _designation;
   String? _mobileNumber;
   String? _registeredMovie;
   String? _productionHouse;
@@ -43,6 +44,8 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
       if (loginMaps.isNotEmpty && mounted) {
         setState(() {
           _managerName = loginMaps.first['manager_name']?.toString() ?? '';
+          _designation = loginMaps.first['subUnitName']?.toString() ?? '';
+
           _mobileNumber = loginMaps.first['mobile_number']?.toString() ?? '';
           _registeredMovie =
               loginMaps.first['registered_movie']?.toString() ?? '';
@@ -52,6 +55,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
 
           // Update global variables for consistency across app
           managerName = _managerName;
+          designation = _designation;
           registeredMovie = _registeredMovie;
           productionHouse = _productionHouse;
           ProfileImage = _profileImage;
@@ -62,6 +66,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
       if (mounted) {
         setState(() {
           _managerName = '';
+          _designation = '';
           _mobileNumber = '';
           _registeredMovie = '';
           _productionHouse = '';
@@ -363,14 +368,14 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications),
-                color: Colors.white,
-                iconSize: 24,
-                onPressed: () {
-                  // TODO: Implement navigation to Approvalstatus
-                },
-              ),
+              // IconButton(
+              //   icon: const Icon(Icons.notifications),
+              //   color: Colors.white,
+              //   iconSize: 24,
+              //   onPressed: () {
+              //     // TODO: Implement navigation to Approvalstatus
+              //   },
+              // ),
               Builder(
                 builder: (context) => IconButton(
                   icon: const Icon(Icons.menu, color: Colors.white),
@@ -442,9 +447,9 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                  const Text(
-                                    "Dubbing Manager",
-                                    style: TextStyle(
+                                  Text(
+                                    _designation ?? '',
+                                    style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.white70,
                                     ),
@@ -497,7 +502,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                                       _registeredMovie ??
                                           'No Project Selection',
                                       style: const TextStyle(
-                                        fontSize: 20,
+                                        fontSize: 16,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
