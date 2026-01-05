@@ -20,8 +20,6 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
   double _latitude = 0.0;
   double _longitude = 0.0;
   int _selectedShiftId = 1;
-  int _selectedLocationTypeId = 1;
-  String _selectedLocationType = "In-station";
   String? _defaultCallsheetName;
   DateTime? _selectedDate;
 
@@ -32,12 +30,6 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     {'id': 4, 'name': '2PM - 10PM (Evening)'},
     {'id': 5, 'name': '6PM - 2AM (Night)'},
     {'id': 6, 'name': '10PM - 6AM (Mid-Night)'},
-  ];
-
-  final List<Map<String, dynamic>> _locationTypes = [
-    {'id': 1, 'name': 'In-station'},
-    {'id': 2, 'name': 'Out-station'},
-    {'id': 3, 'name': 'Outside City'},
   ];
 
   @override
@@ -162,8 +154,8 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         latitude: _latitude,
         longitude: _longitude,
         location: _locationController.text,
-        locationType: _selectedLocationType,
-        locationTypeId: _selectedLocationTypeId,
+        locationType: "In-station",
+        locationTypeId: 1,
         createdAt: createdAt,
         createdDate: createdDate,
         createdAtTime: createdAtTime,
@@ -280,20 +272,6 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
                       _buildTextField(
                         controller: _nameController,
                         hint: "Enter callsheet name",
-                      ),
-                      const SizedBox(height: 15),
-                      _buildFieldLabel("Location type"),
-                      _buildDropdownField(
-                        value: _selectedLocationTypeId,
-                        items: _locationTypes,
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedLocationTypeId = val!;
-                            _selectedLocationType = _locationTypes.firstWhere(
-                              (t) => t['id'] == val,
-                            )['name'];
-                          });
-                        },
                       ),
                       const SizedBox(height: 15),
                       _buildFieldLabel("Location"),
