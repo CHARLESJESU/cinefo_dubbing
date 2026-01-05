@@ -6,6 +6,21 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 import 'package:intl/intl.dart';
 import '../variables.dart';
+import '../sessionexpired.dart';
+
+// Helper to check for session expiration and navigate if needed
+void _checkSessionExpiration(String responseBody) {
+  try {
+    final decoded = jsonDecode(responseBody);
+    if (decoded is Map && decoded['errordescription'] == "Session Expired") {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (context) => const Sessionexpired()),
+      );
+    }
+  } catch (e) {
+    // If JSON parsing fails, ignore
+  }
+}
 
 // Helper to show concise user-facing SnackBars from non-UI code.
 // Do NOT show exception details to the user. Network errors display
@@ -118,6 +133,9 @@ Future<Map<String, dynamic>> createCallSheetApi({
     );
 
     print('🚀 createCallSheetApi Response: ${createcallsheetresponse.body}');
+
+    _checkSessionExpiration(createcallsheetresponse.body);
+
     return {
       'statusCode': createcallsheetresponse.statusCode,
       'body': createcallsheetresponse.body,
@@ -165,6 +183,8 @@ Future<Map<String, dynamic>> agentreportapi() async {
       },
       body: jsonEncode(payload),
     );
+
+    _checkSessionExpiration(response.body);
 
     return {
       'statusCode': response.statusCode,
@@ -226,6 +246,8 @@ Future<Map<String, dynamic>> lookupcallsheetapi({
         );
         print('🚗 lookupcallsheetapi Payload: $payload');
         print('🚗 lookupcallsheetapi Body: ${response.body}');
+
+        _checkSessionExpiration(response.body);
 
         // on transient server error, wait before retrying
         if (response.statusCode == 503 && attempt < 2) {
@@ -293,6 +315,8 @@ Future<Map<String, dynamic>> lookupcallsheetapi({
           '🚗 lookupcallsheetapi (alt) Status: ${altResponse.statusCode} (vmid=${token.substring(0, 8)}...)',
         );
         print('🚗 lookupcallsheetapi (alt) Body: ${altResponse.body}');
+
+        _checkSessionExpiration(altResponse.body);
 
         if (altResponse.statusCode == 200) {
           return {
@@ -366,6 +390,8 @@ Future<Map<String, dynamic>> attendencereportapi({
       '🚗 attendencereportapi Status API Response Body: ${tripstatusresponse.body}',
     );
 
+    _checkSessionExpiration(tripstatusresponse.body);
+
     return {
       'statusCode': tripstatusresponse.statusCode,
       'body': tripstatusresponse.body,
@@ -415,6 +441,8 @@ Future<Map<String, dynamic>> fetchcallsheetapi({required int projectid}) async {
       '🚗 fetchcallsheetapi Status API Response Body: ${fetchcallsheetapiresponse.body}',
     );
 
+    _checkSessionExpiration(fetchcallsheetapiresponse.body);
+
     return {
       'statusCode': fetchcallsheetapiresponse.statusCode,
       'body': fetchcallsheetapiresponse.body,
@@ -460,6 +488,8 @@ Future<Map<String, dynamic>> forouttimelookupapi() async {
     print(
       '🚗 fetchcallsheetapi Status API Response Body: ${forouttimelookupapiresponse.body}',
     );
+
+    _checkSessionExpiration(forouttimelookupapiresponse.body);
 
     return {
       'statusCode': forouttimelookupapiresponse.statusCode,
@@ -522,6 +552,8 @@ Future<Map<String, dynamic>> closecallsheetapi({
     print(
       '🚗 closecallsheetapi Status API Response Body: ${closecallsheetapiresponse.body}',
     );
+
+    _checkSessionExpiration(closecallsheetapiresponse.body);
 
     // Try to parse the response body to detect logical success, since
     // some endpoints return HTTP 200 even when the operation failed.

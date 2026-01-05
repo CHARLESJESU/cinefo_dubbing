@@ -16,6 +16,7 @@ bool isoffline = false;
 String? productionHouse;
 String? projectId;
 String? managerName;
+String? designation;
 String? registeredMovie;
 int? productionTypeId;
 List<dynamic> movieProjects = [];
@@ -101,3 +102,6 @@ final RouteObserver<ModalRoute<void>> routeObserver =
 // Global key to show SnackBars from non-UI code (e.g. API helpers)
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
+
+// Global key for navigation from non-UI code (e.g. API helpers for session expiration)
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

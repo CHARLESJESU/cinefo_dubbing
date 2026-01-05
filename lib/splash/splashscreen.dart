@@ -60,8 +60,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
           print('🔍 DEBUG: Final isDriver=$isDriver, isAgent=$isAgent');
 
-          if (mounted) {
-            if (!isDriver) {
+          if (mounted) { 
+            if (loginData!=null) {
               print('🔍 DEBUG: Navigating to RoutescreenforIncharge');
               Navigator.pushReplacement(
                 context,
