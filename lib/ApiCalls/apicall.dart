@@ -161,213 +161,49 @@ Future<Map<String, dynamic>> createCallSheetApi({
 
 Future<Map<String, dynamic>> agentreportapi() async {
   try {
-    if (globalloginData == null) await fetchloginDataFromSqlite();
-
-    final payload = {
-      "unitid": unitid ?? agentunitid,
-      "vmid": vmid ?? 0,
-      "vuid": vuid ?? 0,
-      "projectid": projectId ?? "0",
-      "baseUrl": dancebaseurl,
-    };
-
-    final response = await http.post(
+    final payload = {};
+    print("agentreportapiagentreportapi ${globalloginData?['vsid']}");
+    final tripstatusresponse = await http.post(
       processSessionRequest,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'VMETID': vmetid_checktheperson,
+        'VMETID':
+            'Oi05x+2wDhjG1diiQLR9DV6UwTPSDdKGvjNubE+YYu/ZpQ28r5o6d3NMOcFfbkIRpQ1Wk667jx5ksuyGpm3mE3vD1KOeoxTmu4c9ZFwXst8MSA1E+3kkvc9DgEGDXCou+gB64ztDzmo46NIPGVWl+nFdCyBxDnWn0sVaDWV2EIZh9ZADizVNOGfK5WVxWPZPipiBlQ9Pc9rzTo+JqvHmY7G0MXvnVQpnIMoIov5Hr7gP02/NhijxTA7+yLEggkZ0Ko+FogRjSi32PwnzY/K/dPntPT4cdXXuQIOV2CPePsd4Hy+pjrx79v2wD1V37zb8uDx+7kQ2QtWhvtK7R6iwEw==',
         'VSID': globalloginData?['vsid'] ?? '',
-        'DEVICETYPE': '2',
-        'BASEURL': dancebaseurl,
-        'VPID': vpid?.toString() ?? '',
       },
       body: jsonEncode(payload),
     );
 
-    _checkSessionExpiration(response.body);
+    print(
+        '🚗 driverreportapi Status API Response Status: ${tripstatusresponse.statusCode}');
+    print('🚗 driverreportapi Status API Response Status: ${payload}');
+    print(
+        '🚗 driverreportapi Status API Response Body: ${tripstatusresponse.body}');
 
     return {
-      'statusCode': response.statusCode,
-      'body': response.body,
-      'success': response.statusCode == 200,
+      'statusCode': tripstatusresponse.statusCode,
+      'body': tripstatusresponse.body,
+      'success': tripstatusresponse.statusCode == 200,
     };
   } catch (e) {
-    _showExceptionSnackBar(
-      e,
-      prefix: e is SocketException ? 'Turn on the network' : null,
-    );
-    print('❌ Error in agentreportapi: $e');
+    print('❌ Error in tripstatusapi: $e');
     return {
       'statusCode': 0,
-      'body': '',
+      'body': 'Error: $e',
       'success': false,
-      'errorMessage': e is SocketException
-          ? 'Network issue'
-          : 'Something went wrong',
     };
   }
 }
 
-// Lookup callsheet for a project (statusid = 1)
-Future<Map<String, dynamic>> lookupcallsheetapi({
-  required int projectid,
-  required String vsid,
-}) async {
-  try {
-    final payload = {"projectid": projectid, "statusid": 1};
-
-    // Try a list of possible VMETID tokens (some environments use different tokens)
-    final List<String> candidateVmetids = [
-      // Token used in the original app for lookupcallsheet
-      'RxvjE+jpr7/hdMwDmyDIz5+FC3qCCTJfmFVMypvuabzCRU/uge/pTo80n0qeb1J+XPjQ/JulyZ/5ufuiPOEQ9xm84PHIeHYz3dXvNCuuyFYO1Vfpq4B79KHm5kEbv5M3YvEn7YSUoetwT0mnNMUJUB1zwDNoOxCk7MQ7+71CXlphHDn/O5Nx1klD0Pc/LlDdZmwV2WcKWRvNgvlllG3eAVuVO8A4ng0mR14Rr/lfJfK0wxH7xu/9UShGk5529kKcRYtndqTr4CgCozRTInR1cIUbkKoeCCbdykcuVmEY8h23UatlRLGUsD9FJXRioRmOo9hKOgtk9FxC1qoJhV+x+g==',
-      vmetid_Fecth_callsheet_members,
-      vmetid_checktheperson,
-      vmetid_fetch_unit,
-      vmetid_fetch_config_unit_allowance,
-    ];
-
-    for (final token in candidateVmetids) {
-      for (int attempt = 0; attempt < 3; attempt++) {
-        final response = await http.post(
-          processSessionRequest,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'VMETID': token,
-            'VSID': vsid,
-            'DEVICETYPE': '2',
-            'BASEURL': dancebaseurl,
-            'VPID': vpid?.toString() ?? '',
-          },
-          body: jsonEncode(payload),
-        );
-
-        print(
-          '🚗 lookupcallsheetapi Status: ${response.statusCode} (vmid=${token.substring(0, 8)}..., attempt ${attempt + 1})',
-        );
-        print('🚗 lookupcallsheetapi Payload: $payload');
-        print('🚗 lookupcallsheetapi Body: ${response.body}');
-
-        _checkSessionExpiration(response.body);
-
-        // on transient server error, wait before retrying
-        if (response.statusCode == 503 && attempt < 2) {
-          await Future.delayed(Duration(seconds: 1 + attempt * 2));
-          continue;
-        }
-
-        // If successful or any other non-503 response, try to detect expected shape
-        if (response.statusCode == 200) {
-          try {
-            final decoded = jsonDecode(response.body);
-            if (decoded is List || decoded['responseData'] != null) {
-              return {
-                'statusCode': response.statusCode,
-                'body': response.body,
-                'success': true,
-                'usedVMETID': token,
-              };
-            }
-            // return even if shape is unexpected but status 200
-            return {
-              'statusCode': response.statusCode,
-              'body': response.body,
-              'success': true,
-              'usedVMETID': token,
-            };
-          } catch (_) {
-            return {
-              'statusCode': response.statusCode,
-              'body': response.body,
-              'success': true,
-              'usedVMETID': token,
-            };
-          }
-        }
-
-        // If not 200 and not retriable, return the response so caller can decide
-        if (response.statusCode != 503) {
-          return {
-            'statusCode': response.statusCode,
-            'body': response.body,
-            'success': false,
-            'usedVMETID': token,
-          };
-        }
-      }
-    }
-
-    // Try the non-session endpoint with candidate tokens as a last resort
-    for (final token in candidateVmetids) {
-      try {
-        final altResponse = await http.post(
-          processRequest,
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'VMETID': token,
-            'BASEURL': dancebaseurl,
-            'DEVICETYPE': '2',
-            'VPID': vpid?.toString() ?? '',
-          },
-          body: jsonEncode(payload),
-        );
-
-        print(
-          '🚗 lookupcallsheetapi (alt) Status: ${altResponse.statusCode} (vmid=${token.substring(0, 8)}...)',
-        );
-        print('🚗 lookupcallsheetapi (alt) Body: ${altResponse.body}');
-
-        _checkSessionExpiration(altResponse.body);
-
-        if (altResponse.statusCode == 200) {
-          return {
-            'statusCode': altResponse.statusCode,
-            'body': altResponse.body,
-            'success': true,
-            'usedVMETID': token,
-          };
-        } else {
-          return {
-            'statusCode': altResponse.statusCode,
-            'body': altResponse.body,
-            'success': false,
-            'usedVMETID': token,
-          };
-        }
-      } catch (e) {
-        print(
-          '❌ lookupcallsheetapi alt request failed for token ${token.substring(0, 8)}...: $e',
-        );
-        continue;
-      }
-    }
-
-    return {'statusCode': 503, 'body': 'Server error', 'success': false};
-  } catch (e) {
-    _showExceptionSnackBar(
-      e,
-      prefix: e is SocketException ? 'Turn on the network' : null,
-    );
-    print('❌ Error in lookupcallsheetapi: $e');
-    return {
-      'statusCode': 0,
-      'body': '',
-      'success': false,
-      'errorMessage': e is SocketException
-          ? 'Network issue'
-          : 'Something went wrong',
-    };
-  }
-}
 
 Future<Map<String, dynamic>> attendencereportapi({
   required String callsheetid,
-  int? unitIdParam,
 }) async {
   try {
     if (globalloginData == null) await fetchloginDataFromSqlite();
 
     final payload = {
-      "unitid": unitIdParam ?? unitid ?? agentunitid ?? 18,
+      "unitid": dubbingunitid,
       "callsheetid": callsheetid,
       "vmid": 0,
     };
@@ -377,7 +213,7 @@ Future<Map<String, dynamic>> attendencereportapi({
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'VtHdAOR3ljcro4U+M9+kByyNPjr8d/b3VNhQmK9lwHYmkC5cUmqkmv6Ku5FFOHTYi9W80fZoAGhzNSB9L/7VCTAfg9S2RhDOMd5J+wkFquTCikvz38ZUWaUe6nXew/NSdV9K58wL5gDAd/7W0zSOpw7Qb+fALxSDZ8UmWdk7MxLkZDn0VIHwVAgv13JeeZVivtG7gu0DJvTyPixMJUFCQzzADzJHoIYtgXV4342izgfc4Lqca4rdjVwYV79/LLqmz1M8yAWXqfSRb+ArLo6xtPrjPInGZcIO8U6uTH1WmXvw+pk3xKD/WEEAFk69w8MI1TrntrzGgDPZ21NhqZXE/w==',
-        'VSID': globalloginData?['vsid'] ?? vsid ?? '',
+        'VSID': globalloginData?['vsid'] ??  '',
       },
       body: jsonEncode(payload),
     );
@@ -476,7 +312,7 @@ Future<Map<String, dynamic>> forouttimelookupapi() async {
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'Bz0Pmf2BnX5zgYLKjoR+OJrgsp8ONRRtexO8AoYyhCYUuJUjCI2wlElILwRm0CQE8Cn2XJkvRY1FT+xuXUYUwqWYSxc40wzbecpGud3i2O4zsN1bX1FAjHWR2JgSyUXEAhjpyrtln15IkXD62j9GgqrJlR4yfFWLv14HkX+L0dMxF67Mm13f6cUQXYaQS8AJs+H2BqVwjnGqVvVaJ8tGor8cadKoDqiwst9C8g2KshLLlPLdyuKirErLThbp+qZ5nQgPJeMtvjuqU9m2p6RmsxuAZgH4+R5Z4jA2OZjlnOO/1hs4K9KWOzMovGiGLuXKfXZbII7wQdX7kItn8uepCQ==',
-        'VSID': globalloginData?['vsid'] ?? vsid ?? '',
+        'VSID': globalloginData?['vsid'] ?? '',
       },
       body: jsonEncode(payload),
     );
@@ -540,7 +376,7 @@ Future<Map<String, dynamic>> closecallsheetapi({
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'O/OtGf1bn9oD4GFpjRQ+Dec3uinWC4FwTdbrFCyiQDpN8SPMhon+ZaDHuLsnBHmfqGAjFXy6Gdjt6mQwzwqgfdWu+e+M8qwNk8gX9Ca3JxFQc++CDr8nd1Mrr57aHoLMlXprbFMxNy7ptfNoccm61r/9/lHCANMOt85n05HVfccknlopttLI5WM7DsNVU60/x5qylzlpXL24l8KwEFFPK1ky410+/uI3GkYi0l1u9DektKB/m1CINVbQ1Oob+FOW5lhNsBjqgpM/x1it89d7chbThdP5xlpygZsuG0AW4lakebF3ze497e16600v72fclgAZ3M21C0zUM4w9XIweMg==',
-        'VSID': globalloginData?['vsid'] ?? vsid ?? '',
+        'VSID': globalloginData?['vsid'] ??  '',
       },
       body: jsonEncode(payload),
     );
