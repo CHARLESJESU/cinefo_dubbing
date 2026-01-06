@@ -1,3 +1,5 @@
+import 'package:cinefo_dubbing/ApiCalls/apicall.dart';
+import 'package:cinefo_dubbing/Screen/ProjectListScreen.dart';
 import 'package:flutter/material.dart';
 
 import '../../service/update_service.dart';
@@ -27,6 +29,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeSplashScreen() async {
     // Wait for 1 second to display splash screen
     await Future.delayed(Duration(seconds: 1));
+     await fetchloginDataFromSqlite();
 
     try {
       // Get active login data using LoginSQLiteHelper
@@ -66,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const RoutescreenforDubbingIncharge(),
+                  builder: (context) => const ProjectListScreen(),
                 ),
               );
             }

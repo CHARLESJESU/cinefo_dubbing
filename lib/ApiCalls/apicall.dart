@@ -428,7 +428,7 @@ Future<Map<String, dynamic>> fetchcallsheetapi({required int projectid}) async {
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'RxvjE+jpr7/hdMwDmyDIz5+FC3qCCTJfmFVMypvuabzCRU/uge/pTo80n0qeb1J+XPjQ/JulyZ/5ufuiPOEQ9xm84PHIeHYz3dXvNCuuyFYO1Vfpq4B79KHm5kEbv5M3YvEn7YSUoetwT0mnNMUJUB1zwDNoOxCk7MQ7+71CXlphHDn/O5Nx1klD0Pc/LlDdZmwV2WcKWRvNgvlllG3eAVuVO8A4ng0mR14Rr/lfJfK0wxH7xu/9UShGk5529kKcRYtndqTr4CgCozRTInR1cIUbkKoeCCbdykcuVmEY8h23UatlRLGUsD9FJXRioRmOo9hKOgtk9FxC1qoJhV+x+g==',
-        'VSID': globalloginData?['vsid'] ?? vsid ?? '',
+        'VSID': globalloginData?['vsid'] ??  '',
       },
       body: jsonEncode(payload),
     );
