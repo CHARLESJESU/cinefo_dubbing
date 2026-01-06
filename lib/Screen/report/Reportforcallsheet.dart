@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'callsheetmembers.dart';
 import '../../ApiCalls/apicall.dart' as apicalls;
-import '../../variables.dart' as vars;
 
 class Reportforcallsheet extends StatefulWidget {
   const Reportforcallsheet({super.key});
@@ -15,7 +14,7 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
   bool _isLoading = false;
   List<Map<String, dynamic>> callSheetData = [];
   String global_projectidString = "";
-
+  
   @override
   void initState() {
     super.initState();
@@ -29,32 +28,22 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
     try {
       // First fetch login data from SQLite
       await apicalls.fetchloginDataFromSqlite();
-
-      // Then call lookup callsheet API using projectId
-      final int pid = int.tryParse(vars.projectId ?? '0') ?? 0;
-      final String vs = vars.vsid ?? '';
-      var result = await apicalls.lookupcallsheetapi(projectid: pid, vsid: vs);
-      print("🚗 lookupcallsheetapi Response: ${result['body']}");
+      
+      // Then call agent report API
+      final result = await apicalls.agentreportapi();
+      print("🚗 Agent Report API Response: ${result['body']}");
       print("🔍 API Result Success: ${result['success']}");
-
-      // If lookup fails (server 503), fallback to agentreportapi() which may return usable data
-      if (result['success'] != true) {
-        print('⚠️ lookupcallsheetapi failed, falling back to agentreportapi()');
-        final agentResult = await apicalls.agentreportapi();
-        print("🚗 agentreportapi Response: ${agentResult['body']}");
-        // prefer agentResult body if lookup failed
-        result = agentResult;
-      }
-
+      print("🔍 API Result Keys: ${result.keys}");
+      
       // Parse the response and extract callsheet data
       _parseCallSheetResponse(result['body']);
-
+      
       if (callSheetData.isNotEmpty) {
         _showSuccess('Callsheet data loaded successfully!');
       }
     } catch (e) {
       print('❌ Error calling API: $e');
-      _showError('Failed to load callsheet data');
+      _showError('Error loading callsheet data: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -62,69 +51,63 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
 
   // Parse the API response and extract callsheet data
   void _parseCallSheetResponse(dynamic responseBody) {
+    print('🔧 Starting to parse response...');
+    print('🔧 Response body type: ${responseBody.runtimeType}');
+    print('🔧 Response body: $responseBody');
+    
     try {
-      dynamic response;
-
-      // Check if responseBody is already a object or needs to be decoded
+      Map<String, dynamic> response;
+      
+      // Check if responseBody is already a Map or needs to be decoded
       if (responseBody is String) {
         response = jsonDecode(responseBody);
-      } else {
+      } else if (responseBody is Map<String, dynamic>) {
         response = responseBody;
+      } else {
+        print('❌ Unexpected response type: ${responseBody.runtimeType}');
+        setState(() {
+          callSheetData = [];
+        });
+        return;
       }
-
-      List<dynamic> rawData = [];
-
-      if (response is List) {
-        rawData = response;
-      } else if (response is Map && response['responseData'] != null) {
-        final resData = response['responseData'];
-        if (resData is List) {
-          rawData = resData;
-        } else if (resData is Map) {
-          // Look for the first list found inside the Map
-          bool foundList = false;
-          resData.forEach((key, value) {
-            if (!foundList && value is List) {
-              rawData = value;
-              foundList = true;
-            }
-          });
-          // Fallback: wrap the map itself if no list found
-          if (!foundList) rawData = [resData];
+      
+      print('🔧 Decoded JSON successfully');
+      print('🔧 Response keys: ${response.keys}');
+      print('🔧 responseData exists: ${response.containsKey('responseData')}');
+      print('🔧 responseData value: ${response['responseData']}');
+      print('🔧 responseData type: ${response['responseData']?.runtimeType}');
+      
+      if (response['responseData'] != null && response['responseData'] is List) {
+        final List<dynamic> rawData = response['responseData'] as List;
+        print('🔧 responseData length: ${rawData.length}');
+        
+        setState(() {
+          callSheetData = rawData
+              .where((item) => item != null)
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
+        });
+        
+        print('📋 Parsed ${callSheetData.length} callsheet records');
+        
+        if (callSheetData.isNotEmpty) {
+          print('📋 First record: ${callSheetData[0]}');
+          global_projectidString = callSheetData[0]['projectId']?.toString() ?? "";
+          print('📋 Set global projectId: $global_projectidString');
         }
+      } else {
+        print('⚠️ responseData is null or not a List');
+        print('⚠️ responseData value: ${response['responseData']}');
+        setState(() {
+          callSheetData = [];
+        });
       }
-
-      if (rawData.isNotEmpty && rawData[0] is Map) {
-        print("🔍 First item keys: ${rawData[0].keys.toList()}");
-        print("🔍 First item values: ${rawData[0].values.toList()}");
-      }
-
-      if (rawData.isEmpty && response is Map && response['message'] != null) {
-        String msg = response['message'].toString();
-        if (msg.toLowerCase() != "success") {
-          _showError(msg);
-        }
-      }
-
-      setState(() {
-        callSheetData = rawData
-            .where((item) => item != null && item is Map)
-            .map((item) => Map<String, dynamic>.from(item as Map))
-            .toList();
-      });
-
-      if (callSheetData.isNotEmpty) {
-        global_projectidString =
-            callSheetData[0]['projectId']?.toString() ??
-            callSheetData[0]['projectid']?.toString() ??
-            "";
-      }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('❌ Error parsing callsheet response: $e');
+      print('❌ Stack trace: $stackTrace');
       setState(() {
         callSheetData = [];
       });
-      _showError('Failed to parse server response');
     }
   }
 
@@ -155,9 +138,9 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
   // Format date from YYYYMMDD to DD-MM-YYYY
   String _formatDate(dynamic dateValue) {
     if (dateValue == null) return "N/A";
-
+    
     String dateStr = dateValue.toString();
-
+    
     // If it's in YYYYMMDD format (8 digits)
     if (dateStr.length == 8 && int.tryParse(dateStr) != null) {
       String year = dateStr.substring(0, 4);
@@ -165,183 +148,147 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
       String day = dateStr.substring(6, 8);
       return "$day-$month-$year";
     }
-
+    
     return dateStr;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF2B5682),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text(
-          "Reports",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
+    return Stack(
+      children: [
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF2B5682),
+                Color(0xFF24426B),
+              ],
+            ),
           ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    const Text(
-                      "Today's Schedule",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    if (callSheetData.isEmpty)
-                      Center(
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 40,
-                            horizontal: 20,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Align(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  "Callsheet",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2B5682),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              Icon(
-                                Icons.description_outlined,
-                                size: 80,
-                                color: Colors.grey.withOpacity(0.5),
-                              ),
-                              const SizedBox(height: 20),
-                              const Text(
-                                "No call sheet available",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                "Create a call sheet to see it here",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
+        Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: const Text(
+              "Call Sheets Report",
+              style:
+              TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 30),
+                  // Call sheets list section
+                  if (_isLoading)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      )
-                    else
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...callSheetData.map(
-                            (callSheet) =>
-                                _buildCallSheetCard(context, callSheet),
-                          ),
-                        ],
+                        child: const CircularProgressIndicator(
+                          color: Color(0xFF2B5682),
+                        ),
                       ),
-                    const SizedBox(height: 100),
-                  ],
-                ),
+                    )
+                  else if (callSheetData.isEmpty)
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.description_outlined,
+                              size: 60,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "No Call Sheets Available",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Call Sheets Section
+                        if (callSheetData.isNotEmpty) ...[
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              "Report List",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          ...callSheetData.map((callSheet) =>
+                              _buildCallSheetCard(context, callSheet)),
+                        ],
+                      ],
+                    ),
+                  // Add extra bottom padding to prevent content from being hidden by navigation
+                  const SizedBox(height: 100),
+                ],
               ),
             ),
+          ),
+        ),
+      ],
     );
   }
 
   // Build call sheet card widget similar to incharge report style
   Widget _buildCallSheetCard(
-    BuildContext context,
-    Map<String, dynamic> callSheet,
-  ) {
-    // Extract fields from callSheet map - handle camelCase, lowercase, underscores, and generic v-keys
-    final String callSheetId =
-        (callSheet['callSheetId'] ??
-                callSheet['callsheetid'] ??
-                callSheet['id'] ??
-                callSheet['v5'] ??
-                callSheet['v1'] ??
-                callSheet['callsheetId'])
-            ?.toString() ??
-        "N/A";
-
-    final String callSheetNo =
-        (callSheet['callSheetNo'] ??
-                callSheet['callsheetno'] ??
-                callSheet['no'] ??
-                callSheet['v4'] ??
-                callSheet['v2'] ??
-                callSheet['callsheetNo'])
-            ?.toString() ??
-        "N/A";
-
-    final String projectName =
-        (callSheet['projectName'] ??
-                callSheet['projectname'] ??
-                callSheet['MovieName'] ??
-                callSheet['moviename'] ??
-                callSheet['v3'])
-            ?.toString() ??
-        "N/A";
-
-    final String date = _formatDate(
-      callSheet['date'] ??
-          callSheet['callsheetDate'] ??
-          callSheet['callsheetdate'] ??
-          callSheet['v11'],
-    );
-
-    final String shift =
-        (callSheet['shift'] ??
-                callSheet['shiftName'] ??
-                callSheet['shiftname'] ??
-                callSheet['v13'])
-            ?.toString() ??
-        "N/A";
-
-    final String status =
-        (callSheet['callsheetStatus'] ??
-                callSheet['status'] ??
-                callSheet['callsheet_status'] ??
-                callSheet['v14'])
-            ?.toString() ??
-        "N/A";
+      BuildContext context, Map<String, dynamic> callSheet) {
+    // Extract fields from callSheet map
+    final String callSheetId = callSheet['callSheetId']?.toString() ?? "N/A";
+    final String callSheetNo = callSheet['callSheetNo']?.toString() ?? "N/A";
+    final String projectName = callSheet['projectName']?.toString() ?? "N/A";
+    final String date = _formatDate(callSheet['date']);
+    final String shift = callSheet['shift']?.toString() ?? "N/A";
+    final String status = callSheet['callsheetStatus']?.toString() ?? "N/A";
     return GestureDetector(
       onTap: () {
-        // Navigate to the full callsheet detail screen
+        // Navigate to the full callsheet detail screen (new file)
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -365,7 +312,10 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
               offset: const Offset(0, 2),
             ),
           ],
-          border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
+          border: Border.all(
+            color: Colors.grey.withOpacity(0.2),
+            width: 1,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,10 +347,8 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: _getStatusColor(status).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(6),
@@ -421,7 +369,11 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
             // Project Name
             Row(
               children: [
-                Icon(Icons.movie, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.movie,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
                 const SizedBox(width: 4),
                 Text(
                   "Project: ",
@@ -447,7 +399,11 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
             // Call Sheet ID and Created Date
             Row(
               children: [
-                Icon(Icons.badge, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.badge,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
                 const SizedBox(width: 4),
                 Text(
                   "ID: $callSheetId",
@@ -458,7 +414,11 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.calendar_today,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
                 const SizedBox(width: 4),
                 Text(
                   date,
@@ -474,7 +434,11 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
             // Shift Information
             Row(
               children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+                Icon(
+                  Icons.access_time,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
                 const SizedBox(width: 4),
                 Text(
                   "Shift: ",
@@ -515,5 +479,10 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
       default:
         return Colors.grey;
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

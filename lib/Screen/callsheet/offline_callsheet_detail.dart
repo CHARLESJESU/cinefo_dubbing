@@ -509,8 +509,7 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                       callsheetData: callsheet,
                                     );
                                     if (resp['success'] == true) {
-                                      // on success, mark closed locally and go back
-                                      await _deleteCallsheetFromDB(id, context);
+                                      Navigator.pop(context);
                                     } else {
                                       ScaffoldMessenger.of(
                                         context,
