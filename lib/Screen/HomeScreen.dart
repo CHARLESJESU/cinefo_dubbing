@@ -6,6 +6,7 @@ import '../Login/loginscreen.dart';
 import 'Profile/ProfileScreen.dart';
 import 'Profile/ChangePasswordScreen.dart';
 import 'SqlitelistScreen.dart';
+import 'RoleScreen.dart';
 
 class MyHomeScreen extends StatefulWidget {
   const MyHomeScreen({super.key});
@@ -266,6 +267,32 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                     thickness: 1,
                     indent: 16,
                     endIndent: 16,
+                  ),
+
+                  // Role
+                  ListTile(
+                    leading: const Icon(
+                      Icons.work,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    title: const Text(
+                      'Role',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context); // Close drawer first
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoleScreen(),
+                        ),
+                      );
+                    },
                   ),
 
                   // Change Password
