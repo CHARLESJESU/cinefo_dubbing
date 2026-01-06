@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
-import '../variables.dart';
-import '../Login/loginscreen.dart';
-import 'Profile/ProfileScreen.dart';
-import 'Profile/ChangePasswordScreen.dart';
+import '../../variables.dart';
+import '../../Login/loginscreen.dart';
+import '../Profile/ProfileScreen.dart';
+import '../Profile/ChangePasswordScreen.dart';
 import 'SqlitelistScreen.dart';
 import 'RoleScreen.dart';
 
