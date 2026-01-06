@@ -1,3 +1,4 @@
+import 'package:cinefo_dubbing/ApiCalls/apicall.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:sqflite/sqflite.dart';
@@ -10,7 +11,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:http/http.dart' as http;
 
-import '../common/datafetchfromsqlite.dart';
+
 import '../variables.dart';
 
 String transformVcidToImageUrl(String vcid) {

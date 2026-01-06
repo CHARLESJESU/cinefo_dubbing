@@ -450,3 +450,41 @@ Future<Map<String, dynamic>> closecallsheetapi({
     };
   }
 }
+Future<Map<String, dynamic>> raiserequestapi(int projectid) async {
+  try {
+    final payload = {
+      "callsheetid": 0,
+  "projectid": projectid
+};
+    print("raiserequestapi ${globalloginData?['vsid']}");
+    final raiserequestresponse = await http.post(
+      processSessionRequest,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'VMETID':
+            'LE/EOR30OyNb4E+Kjz45gOazQ6yGMNGd8evS7UqbbZZ3ECwNSBhBziffuiq4Et9kJAZmOVlCIpsaVLuFLTGzaObCpvyDQNACvFTGv/+T93SLNnPZ91xpMjigvv25FmErk24nSx8Y0L3Xo9wNJVFQn58DDdMPMxMuOdrYhUR/kXAMv09yxapmyaDhzxuNA26lF/1yiyczN/eu8n17qhZ0a6uk9VJzYwwHOJBCHrTsoccP4DQBzmu3NB71KunvzmlqexGgToiRLg47h75DV3WSafVQvk9vLL9G7ZxYiBrJM1hg6fST8NazX40BwrtC6herXnEjQHpHwYOQtH+UMr4J7A==',
+        'VSID': globalloginData?['vsid'] ?? '',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(
+        '🚗 raiserequestapi Status API Response Status: ${raiserequestresponse.statusCode}');
+    print('🚗 raiserequestapi Status API Response Status: ${payload}');
+    print(
+        '🚗 raiserequestapi Status API Response Body: ${raiserequestresponse.body}');
+
+    return {
+      'statusCode': raiserequestresponse.statusCode,
+      'body': raiserequestresponse.body,
+      'success': raiserequestresponse.statusCode == 200,
+    };
+  } catch (e) {
+    print('❌ Error in tripstatusapi: $e');
+    return {
+      'statusCode': 0,
+      'body': 'Error: $e',
+      'success': false,
+    };
+  }
+}

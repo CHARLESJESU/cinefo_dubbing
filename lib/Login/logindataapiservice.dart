@@ -154,52 +154,52 @@ class LoginApiService {
     return await fetchDriverSession(vmId: vmId, vsid: vsid);
   }
 
-  /// Check or Raise Request API
-  static Future<Map<String, dynamic>> checkOrRaiseRequestApi({
-    required int vmId,
-    required String vsid,
-    required int projectid,
-    required int productionTypeId,
-  }) async {
-    try {
-      print(
-        '🚗 checkOrRaiseRequestApi (using checktheperson): vmid: $vmId, projectid: $projectid, productiontypeid: $productionTypeId',
-      );
+  // /// Check or Raise Request API
+  // static Future<Map<String, dynamic>> checkOrRaiseRequestApi({
+  //   required int vmId,
+  //   required String vsid,
+  //   required int projectid,
+  //   required int productionTypeId,
+  // }) async {
+  //   try {
+  //     print(
+  //       '🚗 checkOrRaiseRequestApi (using checktheperson): vmid: $vmId, projectid: $projectid, productiontypeid: $productionTypeId',
+  //     );
 
-      final response = await http.post(
-        processSessionRequest,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'VMETID': vmetid_checktheperson,
-          'VSID': vsid,
-          'BASEURL': dancebaseurl,
-        },
-        body: jsonEncode(<String, dynamic>{
-          "vmid": vmId,
-          "projectid": projectid,
-          "productiontypeid": productionTypeId,
-          "baseUrl": dancebaseurl,
-        }),
-      );
+  //     final response = await http.post(
+  //       processSessionRequest,
+  //       headers: <String, String>{
+  //         'Content-Type': 'application/json; charset=UTF-8',
+  //         'VMETID': vmetid_checktheperson,
+  //         'VSID': vsid,
+  //         // 'BASEURL': dancebaseurl,
+  //       },
+  //       body: jsonEncode(<String, dynamic>{
+  //         "vmid": vmId,
+  //         "projectid": projectid,
+  //         "productiontypeid": productionTypeId,
+  //         "baseUrl": dancebaseurl,
+  //       }),
+  //     );
 
-      print('🚗 checkOrRaiseRequestApi API Status: ${response.statusCode}');
-      print('🚗 checkOrRaiseRequestApi API Body: ${response.body}');
+  //     print('🚗 checkOrRaiseRequestApi API Status: ${response.statusCode}');
+  //     print('🚗 checkOrRaiseRequestApi API Body: ${response.body}');
 
-      return {
-        'statusCode': response.statusCode,
-        'body': response.body,
-        'success': response.statusCode == 200,
-      };
-    } catch (e) {
-      print('❌ Error in checkOrRaiseRequestApi: $e');
-      return {
-        'statusCode': 0,
-        'body': '',
-        'success': false,
-        'errorMessage': e is SocketException
-            ? 'Network issue'
-            : 'Something went wrong',
-      };
-    }
-  }
+  //     return {
+  //       'statusCode': response.statusCode,
+  //       'body': response.body,
+  //       'success': response.statusCode == 200,
+  //     };
+  //   } catch (e) {
+  //     print('❌ Error in checkOrRaiseRequestApi: $e');
+  //     return {
+  //       'statusCode': 0,
+  //       'body': '',
+  //       'success': false,
+  //       'errorMessage': e is SocketException
+  //           ? 'Network issue'
+  //           : 'Something went wrong',
+  //     };
+  //   }
+  // }
 }

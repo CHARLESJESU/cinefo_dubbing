@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import '../common/models/project_model.dart';
-import '../variables.dart';
-import '../Login/loginsqlitecode.dart';
-import '../Login/logindataapiservice.dart';
-import '../Route/RouteScreenfordubbingincharge.dart';
-import '../ApiCalls/apicall.dart';
-import '../colorcode/colorcode.dart';
+import '../../common/models/project_model.dart';
+import '../../variables.dart';
+import '../../Login/loginsqlitecode.dart';
+import '../../Login/logindataapiservice.dart';
+import '../../Route/RouteScreenfordubbingincharge.dart';
+import '../../ApiCalls/apicall.dart';
+import '../../colorcode/colorcode.dart';
 import 'HomeScreen.dart';
 
 /// Page to display list of projects/production houses from checkInchargeOrNot API
@@ -143,12 +143,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     if (vmid != null && vsid != null) {
       final int parsedProjectId = int.tryParse(project.projectId) ?? 0;
 
-      final response = await LoginApiService.checkOrRaiseRequestApi(
-        vmId: vmid!,
-        vsid: vsid!,
-        projectid: parsedProjectId,
-        productionTypeId: project.productionTypeId,
-      );
+      final response = await raiserequestapi(parsedProjectId);
 
       bool isSuccess = false;
       String errorMessage = 'Failed to verify project request';
