@@ -1,10 +1,10 @@
-// Callsheet Attendance Details Screen
 import 'dart:convert';
+import 'package:cinefo_dubbing/ApiCalls/apicall.dart';
+import 'package:cinefo_dubbing/sessionexpired.dart';
+import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../../ApiCalls/apicall.dart';
-import '../../sessionexpired.dart';
-import '../../variables.dart';
+
 
 class Callsheetmembers extends StatefulWidget {
   final String projectId;
@@ -25,55 +25,35 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
   bool isLoading = true;
 
   Future<void> reportsscreen() async {
-    print(
-      '📋 Fetching attendance report for callsheet: ${widget.maincallsheetid}',
-    );
-    print('🔍 Unit ID: $agentunitid');
-    print('🔍 VSID: ${vsid ?? ''}');
-
-    await fetchloginDataFromSqlite();
-
+    print(widget.maincallsheetid);
+    print(dubbingunitid);
+    print(globalloginData?['vsid'] ?? '');
+    
+//api call
     try {
-      // Call attendencereportapi with callsheet ID
-      final apiResult = await attendencereportapi(
+      final result = await attendencereportapi(
         callsheetid: widget.maincallsheetid,
-        unitIdParam: agentunitid,
       );
+      
+      if (result['success'] == true && result['statusCode'] == 200) {
+        print("${result['body']}✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ");
+        final decoded = jsonDecode(result['body']);
 
-      print(
-        '📊 attendencereportapi Response Status: ${apiResult['statusCode']}',
-      );
-      print('📊 attendencereportapi Success: ${apiResult['success']}');
-      print('📊 attendencereportapi Body: ${apiResult['body']}');
-
-      if (apiResult['success'] == true) {
-        final decoded = jsonDecode(apiResult['body']);
-        print("✅ API Response decoded: $decoded");
-
-        // Check if API returned an error status (even with HTTP 200)
-        final apiStatus = decoded['status']?.toString() ?? '0';
-
-        if (apiStatus == '1028' || decoded['responseData'] == null) {
-          // API returned an error status or no data
-          print(
-            '⚠️ API returned error or no data - Status: $apiStatus, Message: ${decoded['message']}',
+        // Check if there's a message to show
+        if (decoded['message'] != null &&
+            decoded['message'].toString().isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(decoded['message'].toString()),
+              backgroundColor: decoded['responseData'] != null
+                  ? Colors.green
+                  : Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
           );
-          final msg =
-              decoded['message']?.toString() ?? 'No attendance data available';
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(msg),
-                backgroundColor: Colors.orange,
-                duration: const Duration(seconds: 4),
-              ),
-            );
-          }
-          setState(() {
-            reportData = [];
-            isLoading = false;
-          });
-        } else if (decoded['responseData'] != null) {
+        }
+
+        if (decoded['responseData'] != null) {
           List<AttendanceEntry> entries = (decoded['responseData'] as List)
               .map((e) => AttendanceEntry.fromJson(e))
               .toList();
@@ -81,72 +61,26 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
             reportData = entries;
             isLoading = false;
           });
-          print('✅ Successfully loaded ${entries.length} attendance entries');
         } else {
+          // No data found, stop loading
           setState(() {
             reportData = [];
             isLoading = false;
           });
         }
       } else {
-        // API call failed
-        print('❌ API call failed with status: ${apiResult['statusCode']}');
-        try {
-          final error = jsonDecode(apiResult['body']);
-          print('❌ Error response: $error');
-
-          if (error['errordescription'] == "Session Expired") {
-            if (mounted) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Sessionexpired()),
-              );
-            }
-          } else {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    error['message']?.toString() ??
-                        'Failed to fetch attendance data',
-                  ),
-                  backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 3),
-                ),
-              );
-            }
-          }
-        } catch (e) {
-          print('❌ Error parsing error response: $e');
-          if (mounted) {
-            final err =
-                apiResult['errorMessage'] ?? 'Failed to fetch attendance data';
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(err),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
+        Map error = jsonDecode(result['body']);
+        print(error);
+        if (error['errordescription'] == "Session Expired") {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const Sessionexpired()));
         }
-
         setState(() {
-          reportData = [];
           isLoading = false;
         });
       }
     } catch (e) {
-      print("❌ Exception in reportsscreen: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to fetch attendance data'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-      }
+      print("Exception: $e");
       setState(() => isLoading = false);
     }
   }
@@ -166,21 +100,21 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 80,
                 color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 30, top: 20),
+                  padding: EdgeInsets.only(left: 30, top: 20),
                   child: Row(
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back),
+                        child: Icon(Icons.arrow_back),
                       ),
-                      const SizedBox(width: 20),
-                      const Text(
+                      SizedBox(width: 20),
+                      Text(
                         "Callsheet Attendance Details",
                         style: TextStyle(
                           fontSize: 14,
@@ -192,59 +126,51 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                padding: EdgeInsets.only(left: 20, right: 20, top: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
                       height: 50,
                       decoration: BoxDecoration(
-                        color: const Color.fromRGBO(228, 215, 248, 1),
+                        color: Color.fromRGBO(228, 215, 248, 1),
                         border: Border.all(
-                          color: const Color.fromRGBO(131, 77, 218, 1),
+                          color: Color.fromRGBO(131, 77, 218, 1),
                         ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           SizedBox(width: 10),
                           Expanded(
                             flex: 2,
-                            child: Text(
-                              'Code',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(131, 77, 218, 1),
-                              ),
-                            ),
+                            child: Text('Code',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(131, 77, 218, 1),
+                                )),
                           ),
                           Expanded(
                             flex: 3,
-                            child: Text(
-                              'Name',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(131, 77, 218, 1),
-                              ),
-                            ),
+                            child: Text('Name',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(131, 77, 218, 1),
+                                )),
                           ),
                           Expanded(
-                            child: Text(
-                              'In Time',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(131, 77, 218, 1),
-                              ),
-                            ),
+                            child: Text('In Time',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(131, 77, 218, 1),
+                                )),
                           ),
                           SizedBox(width: 20),
                           Expanded(
-                            child: Text(
-                              'Out Time',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Color.fromRGBO(131, 77, 218, 1),
-                              ),
-                            ),
+                            child: Text('Out Time',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(131, 77, 218, 1),
+                                )),
                           ),
                         ],
                       ),
@@ -254,12 +180,10 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
               ),
               Expanded(
                 child: isLoading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? Center(child: CircularProgressIndicator())
                     : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         itemCount: reportData.length,
                         itemBuilder: (context, index) {
                           final entry = reportData[index];
@@ -268,15 +192,11 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
                             child: Row(
                               children: [
                                 Expanded(
-                                  flex: 2,
-                                  child: Text(entry.code ?? "--"),
-                                ),
+                                    flex: 2, child: Text(entry.code ?? "--")),
                                 Expanded(
-                                  flex: 3,
-                                  child: Text(entry.memberName),
-                                ),
+                                    flex: 3, child: Text(entry.memberName)),
                                 Expanded(child: Text(entry.inTime ?? "--")),
-                                const SizedBox(width: 20),
+                                SizedBox(width: 20),
                                 Expanded(child: Text(entry.outTime ?? "--")),
                               ],
                             ),

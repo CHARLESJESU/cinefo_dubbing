@@ -117,7 +117,7 @@ class LoginApiService {
           'Content-Type': 'application/json; charset=UTF-8',
           'VMETID':
               'fG5k1mWf1OZYinDoY0evBxUZghzEKbrAYeHxQXR4rxFG2XqxVC1CgDUhyUMZM7V0ivoycMFgfIQOzKbug+G+bJVI3hz8Y45cPST676lSzGbR5LukGZECqIFu19CtIdhw/5obOGs1ZGE1MwKpebWTDhsfRL6adTdCUWB3YAQ8/a8pXYx8lACaEs9Ri2D2m7d+h+fOcdQQlpdlpdwxxLAVvnee8OYE39miaxpJFULkWCJhXomrQvOZjCGFzjAF9QWZuGshGb2Xl/gOutmzxplKIc8UBSwApq+6NLuaIsHc+MknqhonpGNq5JJQRRXKMXaVYbhdWDPXQZ8QqhfFrGpDTA==',
-          'VSID': vsid,
+          'VSID': globalloginData?['vsid'] ?? vsid ?? '',
         },
         body: jsonEncode(<String, dynamic>{"vmId": vmId}),
       );

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'dailogei.dart';
 import 'nfcnotifier.dart';
+import '../ApiCalls/apicall.dart';
 
 class Outtimecharles extends StatelessWidget {
   const Outtimecharles({super.key});
@@ -127,6 +128,9 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
         submitted,
         '2',
       );
+      
+      // Call the out-time lookup API
+      forouttimelookupapi();
     });
   }
 
@@ -224,6 +228,9 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                             _rfidController.text,
                             '2', // Out-time status
                           );
+                          
+                          // Call the out-time lookup API
+                          forouttimelookupapi();
                         });
                       }
 
@@ -259,6 +266,9 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                             currentRfid,
                             '2', // Out-time status
                           );
+                          
+                          // Call the out-time lookup API
+                          forouttimelookupapi();
                         });
                       }
 

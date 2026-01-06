@@ -339,18 +339,18 @@ class _LoginscreenState extends State<Loginscreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProjectListScreen(
-                                projects: projects,
-                                onProjectSelected: () {
-                                  // After project selection, navigate to the main route
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RoutescreenforDubbingIncharge(),
-                                    ),
-                                    (route) => false,
-                                  );
-                                },
+                                
+                                // onProjectSelected: () {
+                                //   // After project selection, navigate to the main route
+                                //   Navigator.pushAndRemoveUntil(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (context) =>
+                                //           const RoutescreenforDubbingIncharge(),
+                                //     ),
+                                //     (route) => false,
+                                //   );
+                                // },
                               ),
                             ),
                           );

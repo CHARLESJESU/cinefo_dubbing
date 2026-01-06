@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color hostelianyellow = Color(0xFFF5AE08);
-  static const Color vfacedarkblue = Color(0xFF1B1272);
-  static const Color vfacelightblue = Color(0xFF2B5FC9);
+  // Gradient colors
+  static const List<Color> primaryGradient = [
+    Color(0xFF2B5682),
+    Color(0xFF24426B),
+  ];
 
-  static const Color cinefoblue2 = Color(0xFF262C46);
+  // Individual colors for direct use
+  static const Color primaryLight = Color(0xFF2B5682);
+  static const Color primaryDark = Color(0xFF24426B);
 
-  static const Color appblue = Color(0xFF41a5f7);
-  static const Color appgray = Color(0xF5F5F5FF);
-  static const Color color1 = Color(0xFF234c91);
-  static const Color color2 = Color(0xFF96d0fa);
-  static const Color color3 = Color(0xFF262E08);
-  static const Color color4 = Color(0xFF96d0fa);
-  static const Color primaryLight = Color(0xFF41a5f7);
+  // Gradient decoration for easy reuse
+  static const BoxDecoration gradientBackground = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: primaryGradient,
+    ),
+  );
 }
