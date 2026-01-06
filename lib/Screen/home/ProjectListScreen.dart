@@ -143,12 +143,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     if (vmid != null && vsid != null) {
       final int parsedProjectId = int.tryParse(project.projectId) ?? 0;
 
-      final response = await LoginApiService.checkOrRaiseRequestApi(
-        vmId: vmid!,
-        vsid: vsid!,
-        projectid: parsedProjectId,
-        productionTypeId: project.productionTypeId,
-      );
+      final response = await raiserequestapi(parsedProjectId);
 
       bool isSuccess = false;
       String errorMessage = 'Failed to verify project request';
