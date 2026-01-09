@@ -5,13 +5,11 @@ import 'package:cinefo_dubbing/variables.dart';
 Future<Map<String, dynamic>> forgetpasswordapi() async {
   try {
     final payload = {
-      "emailOrPhone": emailOrPhone ?? '',
-      "vpid": baseurlresult?['vpid'] ?? vpid ?? 0,
-      "vpoid": baseurlresult?['vpoid'] ?? vpoid ?? 0,
-      // Some responses use the key 'vptemplteID' (typo) while others use 'vptemplateID'.
-      "vptemplateID": baseurlresult?['vptemplateID'] ?? vptemplateID ?? 0,
-
-      "ssoGroupId": baseurlresult?['ssoGroupId'] ?? ssoGroupId ?? 0,
+        "emailOrPhone": emailOrPhone ?? '',
+      "vpid": vpid ?? 0,
+      "vpoid": vpoid ?? 0,
+      "vptemplateID": vptemplateID ?? 0,
+      "ssoGroupId": ssoGroupId ?? 0,
     };
     print("🚗🚗🚗🚗🚗 $processRequest");
     final forgetpasswordresponse = await http.post(

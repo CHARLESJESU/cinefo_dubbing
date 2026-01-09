@@ -8,6 +8,14 @@ import 'package:intl/intl.dart';
 import '../variables.dart';
 import '../sessionexpired.dart';
 
+// Helper function to safely convert dynamic values to int
+int? _safeInt(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is String) return int.tryParse(value);
+  return null;
+}
+
 // Helper to check for session expiration and navigate if needed
 void _checkSessionExpiration(String responseBody) {
   try {
@@ -23,9 +31,7 @@ void _checkSessionExpiration(String responseBody) {
 }
 
 // Helper to show concise user-facing SnackBars from non-UI code.
-// Do NOT show exception details to the user. Network errors display
-// a red "Network issue" message; all other errors show a generic
-// message without exposing exception text.
+// Only shows "Network issue" message for network errors.
 void _showExceptionSnackBar(Object e, {String? prefix, int maxLength = 120}) {
   final bool isNetworkError = e is SocketException;
 
@@ -33,16 +39,7 @@ void _showExceptionSnackBar(Object e, {String? prefix, int maxLength = 120}) {
     scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(content: Text('Network issue'), backgroundColor: Colors.red),
     );
-    return;
   }
-
-  // Generic message for non-network errors; do not include exception details.
-  scaffoldMessengerKey.currentState?.showSnackBar(
-    SnackBar(
-      content: Text('Something went wrong'),
-      backgroundColor: Colors.orange,
-    ),
-  );
 }
 
 Future<void> fetchloginDataFromSqlite() async {
@@ -59,17 +56,21 @@ Future<void> fetchloginDataFromSqlite() async {
       final Map<String, dynamic> first = rows.first;
 
       globalloginData = first;
-      productionTypeId = first['production_type_id'] ?? 0;
-      vmid = first['vmid'];
-      vuid = first['vuid'];
-      vpid = first['vpid'];
-      unitid = first['unitid'];
+      
+      // Safe type conversions for int fields
+      productionTypeId = _safeInt(first['production_type_id']);
+      vmid = _safeInt(first['vmid']);
+      vuid = _safeInt(first['vuid']);
+      vpid = _safeInt(first['vpid']);
+      unitid = _safeInt(first['unitid']);
+      mtypeId = _safeInt(first['mtypeId']);
+      vmTypeId = _safeInt(first['vmTypeId']);
+      vbpid = _safeInt(first['vbpid']);
+      vpoid = _safeInt(first['vpoid']);
+      
+      // String fields
       projectId = first['project_id']?.toString() ?? "0";
-      vsid = first['vsid'];
-      mtypeId = first['mtypeId'];
-      vmTypeId = first['vmTypeId'];
-      vbpid = first['vbpid'];
-      vpoid = first['vpoid'];
+      vsid = first['vsid']?.toString();
 
       print(
         "📊 SQLite Load - VMID: $vmid, ProjectID: $projectId, UnitID: $unitid, VUID: $vuid, VSID: $vsid",
@@ -453,10 +454,7 @@ Future<Map<String, dynamic>> closecallsheetapi({
 }
 
 Future<Map<String, dynamic>> raiserequestapi(
-  int projectid, {
-  required vsid,
-  required int callsheetid,
-}) async {
+  int projectid) async {
   try {
     final payload = {"callsheetid": 0, "projectid": projectid};
     print("raiserequestapi ${globalloginData?['vsid']}");

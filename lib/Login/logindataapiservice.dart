@@ -37,8 +37,24 @@ class LoginApiService {
       );
 
       print('🌐 Base URL API Status: ${response.statusCode}');
-      print('🌐 Base URL API Body: ${response.body}');
 
+      // Print response body in chunks to avoid truncation
+      final responseBody = response.body;
+      print("🌐 Base URL response length: ${responseBody.length}");
+      const chunkSize = 800;
+      for (int i = 0; i < responseBody.length; i += chunkSize) {
+        final end = (i + chunkSize < responseBody.length)
+            ? i + chunkSize
+            : responseBody.length;
+        final chunk = responseBody.substring(i, end);
+        print("🌐 Base URL response chunk ${(i ~/ chunkSize) + 1}: $chunk");
+      }
+      baseurlresult = jsonDecode(responseBody)['result'];
+        print(baseurlresult);
+        vpid = baseurlresult?['vpid'] ?? 0;
+        vpoid = baseurlresult?['vpoid'] ?? 0;
+        ssoGroupId = baseurlresult?['ssoGroupId'] ?? 0;
+        vptemplateID = baseurlresult?['vptemplteID'] ?? 0;
       return {
         'statusCode': response.statusCode,
         'body': response.body,
@@ -50,9 +66,7 @@ class LoginApiService {
         'statusCode': 0,
         'body': '',
         'success': false,
-        'errorMessage': e is SocketException
-            ? 'Network issue'
-            : 'Something went wrong',
+        'errorMessage': e is SocketException ? 'Network issue' : '',
       };
     }
   }
@@ -111,9 +125,7 @@ class LoginApiService {
         'statusCode': 0,
         'body': '',
         'success': false,
-        'errorMessage': e is SocketException
-            ? 'Network issue'
-            : 'Something went wrong',
+        'errorMessage': e is SocketException ? 'Network issue' : '',
       };
     }
   }
@@ -154,9 +166,7 @@ class LoginApiService {
         'statusCode': 0,
         'body': '',
         'success': false,
-        'errorMessage': e is SocketException
-            ? 'Network issue'
-            : 'Something went wrong',
+        'errorMessage': e is SocketException ? 'Network issue' : '',
       };
     }
   }

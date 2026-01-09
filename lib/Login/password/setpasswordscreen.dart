@@ -19,6 +19,8 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
       TextEditingController();
   String? passwordError;
   bool isLoading = false;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   bool validatePasswords() {
     setState(() {
@@ -182,11 +184,24 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
               /// New Password TextField
               TextField(
                 controller: newPasswordController,
-                obscureText: true,
+                obscureText: _obscureNewPassword,
                 decoration: InputDecoration(
                   labelText: "New Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureNewPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureNewPassword = !_obscureNewPassword;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -196,11 +211,24 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
               /// Confirm Password TextField
               TextField(
                 controller: confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
                   ),
                 ),
               ),

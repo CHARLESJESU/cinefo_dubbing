@@ -860,7 +860,7 @@ class IntimeSyncService {
             "IntimeSyncService: Deleting row id=${row['id']} after successful POST.",
           );
           try {
-            // Ensure db is open before attempting delete
+          
             if (db == null || !db.isOpen) {
               print('IntimeSyncService: DB closed, reopening before delete');
               db = await openDatabase(path.join(dbPath, 'production_login.db'));

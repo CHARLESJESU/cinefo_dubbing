@@ -1,6 +1,7 @@
 import 'package:cinefo_dubbing/ApiCalls/apicall.dart';
 import 'package:cinefo_dubbing/Login/loginscreen.dart';
 import 'package:cinefo_dubbing/Login/password/passwordapi.dart';
+import 'package:cinefo_dubbing/Route/RouteScreenfordubbingincharge.dart';
 import 'package:cinefo_dubbing/colorcode/colorcode.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -20,6 +21,9 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
   final TextEditingController oldPasswordController = TextEditingController();
   String? passwordError;
   bool isLoading = false;
+  bool _obscureOldPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   bool validatePasswords() {
     setState(() {
@@ -85,11 +89,26 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
               setState(() {
                 isLoading = false;
               });
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => Loginscreen()),
-                (route) => false,
+              
+              // Show success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Password changed successfully!'),
+                  backgroundColor: Colors.green,
+                  duration: Duration(seconds: 2),
+                ),
               );
+              
+              // Navigate after a short delay to show the success message
+              Future.delayed(const Duration(seconds: 1), () {
+                if (mounted) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => RoutescreenforDubbingIncharge()),
+                    (route) => false,
+                  );
+                }
+              });
               return;
             }
           } else {
@@ -189,11 +208,24 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
               /// Old Password TextField
               TextField(
                 controller: oldPasswordController,
-                obscureText: true,
+                obscureText: _obscureOldPassword,
                 decoration: InputDecoration(
                   labelText: "Old Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureOldPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureOldPassword = !_obscureOldPassword;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -203,11 +235,24 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
               /// New Password TextField
               TextField(
                 controller: newPasswordController,
-                obscureText: true,
+                obscureText: _obscureNewPassword,
                 decoration: InputDecoration(
                   labelText: "New Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureNewPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureNewPassword = !_obscureNewPassword;
+                      });
+                    },
                   ),
                 ),
               ),
@@ -217,11 +262,24 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
               /// Confirm Password TextField
               TextField(
                 controller: confirmPasswordController,
-                obscureText: true,
+                obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
+                      });
+                    },
                   ),
                 ),
               ),
