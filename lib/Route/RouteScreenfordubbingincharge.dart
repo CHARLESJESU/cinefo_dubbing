@@ -4,11 +4,12 @@ import '../Screen/report/Reportforcallsheet.dart';
 import '../Screen/callsheet/callsheet.dart';
 
 class RoutescreenforDubbingIncharge extends StatefulWidget {
-  final int initialIndex;   
+  final int initialIndex;
 
   const RoutescreenforDubbingIncharge({
     super.key,
     this.initialIndex = 0,
+    required Map<String, dynamic> callsheet,
   }); // Default to Home tab
 
   @override

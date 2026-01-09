@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nfc_manager/nfc_manager.dart';
+import 'password/forgotpassword.dart';
 
 import '../Route/RouteScreenfordubbingincharge.dart';
 import '../variables.dart';
@@ -83,7 +84,7 @@ class _LoginscreenState extends State<Loginscreen> {
         mobileNumber: loginmobilenumber.text,
         password: loginpassword.text,
         vpid: baseurlresult?['vpid']?.toString() ?? '',
-        vptemplateId: baseurlresult?['vptemplteID']?.toString() ?? '',
+        vptemplateId: baseurlresult?['vptemplateID']?.toString() ?? '',
         baseUrl: dancebaseurl,
       );
 
@@ -339,7 +340,6 @@ class _LoginscreenState extends State<Loginscreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ProjectListScreen(
-                                
                                 // onProjectSelected: () {
                                 //   // After project selection, navigate to the main route
                                 //   Navigator.pushAndRemoveUntil(
@@ -606,7 +606,13 @@ class _LoginscreenState extends State<Loginscreen> {
                                   alignment: Alignment.centerRight,
                                   child: TextButton(
                                     onPressed: () {
-                                      // TODO: Implement forgot password
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ForgetPasswordScreen(),
+                                        ),
+                                      );
                                     },
                                     child: Text(
                                       'Forgot Password?',
