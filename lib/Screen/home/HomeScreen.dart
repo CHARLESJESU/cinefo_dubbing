@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path;
 import '../../variables.dart';
 import '../../Login/loginscreen.dart';
 import '../Profile/ProfileScreen.dart';
-import '../Profile/ChangePasswordScreen.dart';
+import 'package:cinefo_dubbing/Login/password/changepasswordscreen.dart';
 import 'SqlitelistScreen.dart';
 import 'roleuidialog.dart';
 
@@ -291,7 +291,7 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ChangePasswordScreen(),
+                          builder: (context) => const ChangepasswordScreen(),
                         ),
                       );
                     },

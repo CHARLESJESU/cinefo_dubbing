@@ -42,7 +42,13 @@ String? unitName;
 String? idcardurl;
 bool? driver;
 int? callsheetid;
-
+int? ssoGroupId;
+int? vptemplateID;
+String? emailOrPhone;
+int? mobileValidateType;
+Map? forgetpasswordresponseresult;
+String? mainbaseurl;
+Map? otpverifyresponseresult;
 // Unit IDs for configuration
 int dubbingunitid = 52;
 int lightman_unitid = 4;

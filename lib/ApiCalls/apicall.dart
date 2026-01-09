@@ -179,10 +179,12 @@ Future<Map<String, dynamic>> agentreportapi(int projectid) async {
     );
 
     print(
-        '🚗 driverreportapi Status API Response Status: ${tripstatusresponse.statusCode}');
+      '🚗 driverreportapi Status API Response Status: ${tripstatusresponse.statusCode}',
+    );
     print('🚗 driverreportapi Status API Response Status: ${payload}');
     print(
-        '🚗 driverreportapi Status API Response Body: ${tripstatusresponse.body}');
+      '🚗 driverreportapi Status API Response Body: ${tripstatusresponse.body}',
+    );
 
     return {
       'statusCode': tripstatusresponse.statusCode,
@@ -191,14 +193,9 @@ Future<Map<String, dynamic>> agentreportapi(int projectid) async {
     };
   } catch (e) {
     print('❌ Error in tripstatusapi: $e');
-    return {
-      'statusCode': 0,
-      'body': 'Error: $e',
-      'success': false,
-    };
+    return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
   }
 }
-
 
 Future<Map<String, dynamic>> attendencereportapi({
   required String callsheetid,
@@ -217,7 +214,7 @@ Future<Map<String, dynamic>> attendencereportapi({
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'VtHdAOR3ljcro4U+M9+kByyNPjr8d/b3VNhQmK9lwHYmkC5cUmqkmv6Ku5FFOHTYi9W80fZoAGhzNSB9L/7VCTAfg9S2RhDOMd5J+wkFquTCikvz38ZUWaUe6nXew/NSdV9K58wL5gDAd/7W0zSOpw7Qb+fALxSDZ8UmWdk7MxLkZDn0VIHwVAgv13JeeZVivtG7gu0DJvTyPixMJUFCQzzADzJHoIYtgXV4342izgfc4Lqca4rdjVwYV79/LLqmz1M8yAWXqfSRb+ArLo6xtPrjPInGZcIO8U6uTH1WmXvw+pk3xKD/WEEAFk69w8MI1TrntrzGgDPZ21NhqZXE/w==',
-        'VSID': globalloginData?['vsid'] ??  '',
+        'VSID': globalloginData?['vsid'] ?? '',
       },
       body: jsonEncode(payload),
     );
@@ -268,7 +265,7 @@ Future<Map<String, dynamic>> fetchcallsheetapi({required int projectid}) async {
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'RxvjE+jpr7/hdMwDmyDIz5+FC3qCCTJfmFVMypvuabzCRU/uge/pTo80n0qeb1J+XPjQ/JulyZ/5ufuiPOEQ9xm84PHIeHYz3dXvNCuuyFYO1Vfpq4B79KHm5kEbv5M3YvEn7YSUoetwT0mnNMUJUB1zwDNoOxCk7MQ7+71CXlphHDn/O5Nx1klD0Pc/LlDdZmwV2WcKWRvNgvlllG3eAVuVO8A4ng0mR14Rr/lfJfK0wxH7xu/9UShGk5529kKcRYtndqTr4CgCozRTInR1cIUbkKoeCCbdykcuVmEY8h23UatlRLGUsD9FJXRioRmOo9hKOgtk9FxC1qoJhV+x+g==',
-        'VSID': globalloginData?['vsid'] ??  '',
+        'VSID': globalloginData?['vsid'] ?? '',
       },
       body: jsonEncode(payload),
     );
@@ -380,7 +377,7 @@ Future<Map<String, dynamic>> closecallsheetapi({
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
             'O/OtGf1bn9oD4GFpjRQ+Dec3uinWC4FwTdbrFCyiQDpN8SPMhon+ZaDHuLsnBHmfqGAjFXy6Gdjt6mQwzwqgfdWu+e+M8qwNk8gX9Ca3JxFQc++CDr8nd1Mrr57aHoLMlXprbFMxNy7ptfNoccm61r/9/lHCANMOt85n05HVfccknlopttLI5WM7DsNVU60/x5qylzlpXL24l8KwEFFPK1ky410+/uI3GkYi0l1u9DektKB/m1CINVbQ1Oob+FOW5lhNsBjqgpM/x1it89d7chbThdP5xlpygZsuG0AW4lakebF3ze497e16600v72fclgAZ3M21C0zUM4w9XIweMg==',
-        'VSID': globalloginData?['vsid'] ??  '',
+        'VSID': globalloginData?['vsid'] ?? '',
       },
       body: jsonEncode(payload),
     );
@@ -454,12 +451,14 @@ Future<Map<String, dynamic>> closecallsheetapi({
     };
   }
 }
-Future<Map<String, dynamic>> raiserequestapi(int projectid) async {
+
+Future<Map<String, dynamic>> raiserequestapi(
+  int projectid, {
+  required vsid,
+  required int callsheetid,
+}) async {
   try {
-    final payload = {
-      "callsheetid": 0,
-  "projectid": projectid
-};
+    final payload = {"callsheetid": 0, "projectid": projectid};
     print("raiserequestapi ${globalloginData?['vsid']}");
     final raiserequestresponse = await http.post(
       processSessionRequest,
@@ -473,23 +472,21 @@ Future<Map<String, dynamic>> raiserequestapi(int projectid) async {
     );
 
     print(
-        '🚗 raiserequestapi Status API Response Status: ${raiserequestresponse.statusCode}');
+      '🚗 raiserequestapi Status API Response Status: ${raiserequestresponse.statusCode}',
+    );
     print('🚗 raiserequestapi Status API Response Status: ${payload}');
     print(
+
         '🚗 raiserequestapi Status API Response Body: ${raiserequestresponse.body}');
 _checkSessionExpiration(raiserequestresponse.body);
-    return {
+  return {
       'statusCode': raiserequestresponse.statusCode,
       'body': raiserequestresponse.body,
       'success': raiserequestresponse.statusCode == 200,
     };
   } catch (e) {
     print('❌ Error in tripstatusapi: $e');
-    return {
-      'statusCode': 0,
-      'body': 'Error: $e',
-      'success': false,
-    };
+    return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
   }
 }
 
