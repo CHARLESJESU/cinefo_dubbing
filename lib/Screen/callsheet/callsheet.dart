@@ -17,11 +17,23 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
   bool _isLoading = false;
   List<Map<String, dynamic>> callSheetData = [];
   String global_projectidString = "";
+  bool _hasInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _initializeAndCallAPI();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasInitialized) {
+      // Refresh data when returning to this page
+      _initializeAndCallAPI();
+    } else {
+      _hasInitialized = true;
+    }
   }
 
   Future<void> _initializeAndCallAPI() async {
@@ -286,7 +298,7 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
           MaterialPageRoute(
             builder: (_) => OfflineCallsheetDetailScreen(callsheet: callSheet),
           ),
-        );
+        ).then((value) => _initializeAndCallAPI());
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),

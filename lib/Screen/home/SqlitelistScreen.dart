@@ -416,6 +416,10 @@ class _SqlitelistState extends State<Sqlitelist> {
                                       'VCID: ${item['vcid'] ?? 'N/A'}',
                                       style: TextStyle(fontSize: 14),
                                     ),
+                                     Text(
+                                      'RFID: ${item['rfid'] ?? 'N/A'}',
+                                      style: TextStyle(fontSize: 14),
+                                    ),
                                     Text(
                                       'Date: ${_formatDate(item['marked_at'])}',
                                       style: TextStyle(
@@ -566,6 +570,10 @@ class _SqlitelistState extends State<Sqlitelist> {
                                         _buildDetailRow(
                                           'attendance_status',
                                           item['attendance_status'],
+                                        ),
+                                           _buildDetailRow(
+                                          'doubing',
+                                          item['doubing'],
                                         ),
                                         _buildDetailRow('Mode', item['mode']),
                                         _buildDetailRow(

@@ -130,7 +130,7 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
       );
       
       // Call the out-time lookup API
-      forouttimelookupapi();
+      
     });
   }
 
@@ -230,7 +230,7 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                           );
                           
                           // Call the out-time lookup API
-                          forouttimelookupapi();
+                          
                         });
                       }
 
@@ -268,7 +268,7 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                           );
                           
                           // Call the out-time lookup API
-                          forouttimelookupapi();
+                         
                         });
                       }
 

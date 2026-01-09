@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,17 +21,12 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
   bool _isLoading = false;
   double _latitude = 0.0;
   double _longitude = 0.0;
-  int _selectedShiftId = 1;
+  int _selectedShiftId = 0;
   String? _defaultCallsheetName;
   DateTime? _selectedDate;
 
-  final List<Map<String, dynamic>> _shifts = [
-    {'id': 1, 'name': 'Select Shift'},
-    {'id': 2, 'name': '2AM - 9AM (Sunrise)'},
-    {'id': 3, 'name': '6AM - 6PM (Regular)'},
-    {'id': 4, 'name': '2PM - 10PM (Evening)'},
-    {'id': 5, 'name': '6PM - 2AM (Night)'},
-    {'id': 6, 'name': '10PM - 6AM (Mid-Night)'},
+  List<Map<String, dynamic>> _shifts = [
+    {'id': 0, 'name': 'Select Shift'},
   ];
 
   @override
@@ -42,6 +39,31 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
 
   Future<void> _initializeData() async {
     await apicalls.fetchloginDataFromSqlite();
+    print("ennada");
+    final shiftResponse = await apicalls.shiftlistshowcaseapi(
+      productiontypeid: productionTypeId.toString() ?? '0',
+    );
+    
+    if (shiftResponse['success'] == true) {
+      try {
+        final responseBody = json.decode(shiftResponse['body']);
+        if (responseBody['responseData'] != null) {
+          final List<dynamic> shiftData = responseBody['responseData'];
+          setState(() {
+            _shifts = [
+              {'id': 0, 'name': 'Select Shift'},
+              ...shiftData.map((shift) => {
+                'id': shift['shiftId'] as int,
+                'name': shift['shift'] as String,
+              }).toList(),
+            ];
+          });
+          print('✅ Loaded ${shiftData.length} shifts from API');
+        }
+      } catch (e) {
+        print('❌ Error parsing shift response: $e');
+      }
+    }
     if (mounted) setState(() {});
   }
 
@@ -133,10 +155,16 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedShiftId == 1) {
+    if (_selectedShiftId == 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please select a shift")));
+      return;
+    }
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select a date")));
       return;
     }
 
@@ -149,6 +177,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
       final createdAtTime = DateFormat('HH:mm:ss').format(now);
 
       final result = await apicalls.createCallSheetApi(
+        selectedDate: DateFormat('dd-MM-yyyy').format(_selectedDate!),
         callsheetname: _nameController.text.trim(),
         shiftId: _selectedShiftId,
         latitude: _latitude,
@@ -160,8 +189,33 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         createdDate: createdDate,
         createdAtTime: createdAtTime,
       );
-
-      if (result['success']) {
+      print("Create callsheet result: ${result['body']}");
+      
+      // Check for status 1030
+      if (result['data'] != null && 
+          (result['data']["status"] == "1030" || result['data']["status"] == 1030)) {
+        final message = result['data']["message"] ?? 'An error occurred';
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Notice'),
+                content: Text(message),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+          Navigator.pop(context); // Navigate back
+        }
+      } else if (result['success']) {
         _showSuccess("Callsheet created successfully!");
         Navigator.pop(context);
       } else {
@@ -169,7 +223,8 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         _showError(err);
       }
     } catch (e) {
-      _showError('Something went wrong');
+      print("Error in _submitForm: $e");
+      _showError('Something went wrong: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -374,7 +429,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
               child: Text(
                 item['name'],
                 style: TextStyle(
-                  color: item['id'] == 1 ? Colors.grey.shade500 : Colors.black,
+                  color: item['id'] == 0 ? Colors.grey.shade500 : Colors.black,
                   fontSize: 14,
                 ),
               ),

@@ -94,6 +94,7 @@ Future<Map<String, dynamic>> createCallSheetApi({
   required String locationType,
   required int locationTypeId,
   required String createdAt,
+  required String selectedDate,
   required String createdDate,
   required String createdAtTime,
 }) async {
@@ -114,7 +115,7 @@ Future<Map<String, dynamic>> createCallSheetApi({
       "location": location,
       "locationType": "In-station",
       "locationTypeId": 1,
-      "date": createdDate,
+      "date": selectedDate,
       "createdDate": createdDate,
       "createdTime": createdAtTime,
     };
@@ -159,16 +160,19 @@ Future<Map<String, dynamic>> createCallSheetApi({
   }
 }
 
-Future<Map<String, dynamic>> agentreportapi() async {
+Future<Map<String, dynamic>> agentreportapi(int projectid) async {
   try {
-    final payload = {};
+    final payload = {
+  "projectid": projectid,
+  "statusid": 0
+};
     print("agentreportapiagentreportapi ${globalloginData?['vsid']}");
     final tripstatusresponse = await http.post(
       processSessionRequest,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'VMETID':
-            'Oi05x+2wDhjG1diiQLR9DV6UwTPSDdKGvjNubE+YYu/ZpQ28r5o6d3NMOcFfbkIRpQ1Wk667jx5ksuyGpm3mE3vD1KOeoxTmu4c9ZFwXst8MSA1E+3kkvc9DgEGDXCou+gB64ztDzmo46NIPGVWl+nFdCyBxDnWn0sVaDWV2EIZh9ZADizVNOGfK5WVxWPZPipiBlQ9Pc9rzTo+JqvHmY7G0MXvnVQpnIMoIov5Hr7gP02/NhijxTA7+yLEggkZ0Ko+FogRjSi32PwnzY/K/dPntPT4cdXXuQIOV2CPePsd4Hy+pjrx79v2wD1V37zb8uDx+7kQ2QtWhvtK7R6iwEw==',
+            'RxvjE+jpr7/hdMwDmyDIz5+FC3qCCTJfmFVMypvuabzCRU/uge/pTo80n0qeb1J+XPjQ/JulyZ/5ufuiPOEQ9xm84PHIeHYz3dXvNCuuyFYO1Vfpq4B79KHm5kEbv5M3YvEn7YSUoetwT0mnNMUJUB1zwDNoOxCk7MQ7+71CXlphHDn/O5Nx1klD0Pc/LlDdZmwV2WcKWRvNgvlllG3eAVuVO8A4ng0mR14Rr/lfJfK0wxH7xu/9UShGk5529kKcRYtndqTr4CgCozRTInR1cIUbkKoeCCbdykcuVmEY8h23UatlRLGUsD9FJXRioRmOo9hKOgtk9FxC1qoJhV+x+g==',
         'VSID': globalloginData?['vsid'] ?? '',
       },
       body: jsonEncode(payload),
@@ -200,10 +204,10 @@ Future<Map<String, dynamic>> attendencereportapi({
     if (globalloginData == null) await fetchloginDataFromSqlite();
 
     final payload = {
-      "unitid": dubbingunitid,
-      "callsheetid": callsheetid,
-      "vmid": 0,
+    "unitid": unitid,
+"callsheetid": callsheetid
     };
+
     final tripstatusresponse = await http.post(
       processSessionRequest,
       headers: <String, String>{
@@ -472,10 +476,10 @@ Future<Map<String, dynamic>> raiserequestapi(
     );
     print('🚗 raiserequestapi Status API Response Status: ${payload}');
     print(
-      '🚗 raiserequestapi Status API Response Body: ${raiserequestresponse.body}',
-    );
 
-    return {
+        '🚗 raiserequestapi Status API Response Body: ${raiserequestresponse.body}');
+_checkSessionExpiration(raiserequestresponse.body);
+  return {
       'statusCode': raiserequestresponse.statusCode,
       'body': raiserequestresponse.body,
       'success': raiserequestresponse.statusCode == 200,
@@ -483,5 +487,62 @@ Future<Map<String, dynamic>> raiserequestapi(
   } catch (e) {
     print('❌ Error in tripstatusapi: $e');
     return {'statusCode': 0, 'body': 'Error: $e', 'success': false};
+  }
+}
+
+
+Future<Map<String, dynamic>> shiftlistshowcaseapi({
+  required String productiontypeid,
+}) async {
+  try {
+    if (globalloginData == null) await fetchloginDataFromSqlite();
+
+    final payload = 
+ {
+  "productionType": "$productiontypeid"
+}
+    ;
+    print("jdsaj;fkls $payload");
+
+    final shiftlistshowcaseapiresponse = await http.post(
+      processSessionRequest,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'VMETID':
+            'hS1nHKbqxtay7ZfN0tzo5IxtJZLsZXbcVJS90oRm9KRUElvpSu/G/ik57TYlj4PTIfKxYI6P80/LHBjJjUO2XJv2k73r1mhjdd0z1w6z3okJ6uE5+XL1BJiaLjaS+aI7bx7tb9i0Ul8nfe7T059A5AZ6dx5gfML/njWo3K2ltOqcA8sCq7gjijxsKi4JY0LhkGMlHe9D4b+It08K8oHFCpV66R+acr8+iqbiPbWeOn/PphpwA7rDzNkBX5NEvudefosrJ0bfaJpHtMZnh7fYcw1eAAveV7fYc9zxX/W72ILQXlSCFxeeiONi9LfoJsfvkWRS7HtOrtD1x1Q08VeG/w==',
+        'VSID': globalloginData?['vsid'] ??  '',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(
+      '🚗 shiftlistshowcaseapiresponse Status API Response Status: ${shiftlistshowcaseapiresponse.statusCode}',
+    );
+    print('🚗 shiftlistshowcaseapiresponse Payload: ${payload}');
+    print(
+      '🚗 shiftlistshowcaseapiresponse Status API Response Body: ${shiftlistshowcaseapiresponse.body}',
+    );
+
+    _checkSessionExpiration(shiftlistshowcaseapiresponse.body);
+
+    return {
+      'statusCode': shiftlistshowcaseapiresponse.statusCode,
+      'body': shiftlistshowcaseapiresponse.body,
+      'success': shiftlistshowcaseapiresponse.statusCode == 200,
+    };
+  } catch (e) {
+    _showExceptionSnackBar(
+      e,
+      prefix: e is SocketException ? 'Turn on the network' : null,
+    );
+    print('❌ Error in attendencereportapi: $e');
+    return {
+      'statusCode': 0,
+      'body': '',
+      'success': false,
+      'errorMessage': e is SocketException
+          ? 'Network issue'
+          : 'Something went wrong',
+    };
   }
 }

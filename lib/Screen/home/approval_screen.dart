@@ -5,209 +5,117 @@ import 'package:cinefo_dubbing/colorcode/colorcode.dart';
 import 'package:cinefo_dubbing/sessionexpired.dart';
 import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
-import 'package:sqflite/sqflite.dart';
 
 import '../../ApiCalls/apicall.dart';
 
 class ApprovalScreen extends StatefulWidget {
-  final Map<String, dynamic> callSheet;
-  final int approvalid; // initial value: 0 = waiting, 1 = approved
-  const ApprovalScreen(this.approvalid, {Key? key, required this.callSheet})
-    : super(key: key);
+  final int projectid;
+  const ApprovalScreen(this.projectid, {Key? key}) : super(key: key);
+  
   @override
   State<ApprovalScreen> createState() => _ApprovalScreenState();
 }
 
 class _ApprovalScreenState extends State<ApprovalScreen> {
-  Map<String, dynamic>? logindata;
-  int approvalid = 0; // runtime state
-  Database? _database;
-  bool _isLoading = false; // new: show spinner while refreshing
+  bool _isApproved = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // initialize state from widget properties
-    approvalid = widget.approvalid;
-    // print callsheet as requested
-    print('Callsheet: charles ${widget.callSheet}');
-    // call API initializer
-    _initializeAndCallAPI();
+    _checkApprovalStatus();
   }
 
-  Future<void> _initializeAndCallAPI() async {
+  Future<void> _checkApprovalStatus() async {
     try {
-      // First fetch the login_data table values
       await fetchloginDataFromSqlite();
 
       if (globalloginData != null) {
-        // Ensure callsheetStatusId is an int (handle string values)
+        final result = await raiserequestapi(widget.projectid);
+        print('Approval result: $result');
 
-        // Normalize response body to a Map so we can safely inspect responseData
-        try {
-          // Parse callsheet id from the widget.callSheet (handle different key casings)
-          final dynamic rawId = widget.callSheet['callsheetId'] ??
-              widget.callSheet['callsheetid'] ??
-              widget.callSheet['callSheetId'] ??
-              widget.callSheet['CallsheetId'];
-              
-          final int callsheetId = rawId is int
-              ? rawId : (rawId is String ? int.tryParse(rawId) ?? 0 : 0);
-              
-
-          // Parse project id from widget.callSheet (may be provided by caller)
-          final dynamic rawProjectId =
-              widget.callSheet['projectid'] ??
-              widget.callSheet['projectId'] ??
-              widget.callSheet['projectID'] ??
-              widget.callSheet['ProjectId'];
-          final int projectId = rawProjectId is int
-              ? rawProjectId
-              : (rawProjectId is String ? int.tryParse(rawProjectId) ?? 0 : 0);
-
-          // Call the second approval API and log the response (safe await with try/catch)
-          final result2 = await raiserequestapi(
-            projectId,
-            callsheetid: callsheetId,
-            vsid: globalloginData?['vsid'] ?? '',
-          );
-          print(' result: $result2');
-
-          // Check for session expiration
-          if (!result2['success']) {
-            try {
-              Map error = jsonDecode(result2['body']);
-              if (error['errordescription'] == "Session Expired") {
-                if (mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Sessionexpired(),
-                    ),
-                  );
-                }
-                return;
+        // Check for session expiration
+        if (!result['success']) {
+          try {
+            Map error = jsonDecode(result['body']);
+            if (error['errordescription'] == "Session Expired") {
+              if (mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Sessionexpired(),
+                  ),
+                );
               }
-            } catch (e) {
-              print('Error parsing error response: $e');
+              return;
             }
+          } catch (e) {
+            print('Error parsing error response: $e');
           }
-
-          // Parse result2 body safely to inspect responseData.Statusid
-          dynamic body2 = result2['body'];
-          Map<String, dynamic>? responseBody2;
-          if (body2 == null) {
-            responseBody2 = null;
-          } else if (body2 is String) {
-            try {
-              final parsed2 = jsonDecode(body2);
-              if (parsed2 is Map<String, dynamic>) {
-                responseBody2 = parsed2;
-              }
-            } catch (e) {
-              responseBody2 = null;
-            }
-          } else if (body2 is Map<String, dynamic>) {
-            responseBody2 = body2;
-          }
-
-          // Extract Statusid robustly (different possible key casings) and check for value 2
-          int statusId = 0;
-          if (responseBody2 != null && responseBody2['responseData'] != null) {
-            final dynamic respData = responseBody2['responseData'];
-            final dynamic rawStatusId =
-                respData['Statusid'] ??
-                respData['StatusId'] ??
-                respData['statusid'] ??
-                respData['statusId'] ??
-                respData['Status'] ??
-                respData['status'];
-
-            if (rawStatusId is int) {
-              statusId = rawStatusId;
-            } else if (rawStatusId is String) {
-              statusId = int.tryParse(rawStatusId) ?? 0;
-            }
-          }
-
-          if (statusId == 2) {
-            setState(() {
-              print("success charles");
-              approvalid = 1;
-            });
-          } else {
-            print(
-              'Approval not final (Statusid=$statusId), keeping approvalid=0',
-            );
-          }
-        } catch (e) {
-          print('Error calling approvalofproductionmanager2api: $e');
         }
 
-        // Do not change approvalid here; it is set only when statusId == 2 above.
+        // Parse response to check Statusid
+        dynamic body = result['body'];
+        Map<String, dynamic>? responseBody;
+        
+        if (body is String) {
+          try {
+            final parsed = jsonDecode(body);
+            if (parsed is Map<String, dynamic>) {
+              responseBody = parsed;
+            }
+          } catch (e) {
+            responseBody = null;
+          }
+        } else if (body is Map<String, dynamic>) {
+          responseBody = body;
+        }
+
+        // Extract Statusid from responseData
+        int statusId = 0;
+        if (responseBody != null && responseBody['responseData'] != null) {
+          final dynamic respData = responseBody['responseData'];
+          final dynamic rawStatusId =
+              respData['Statusid'];
+
+          if (rawStatusId is int) {
+            statusId = rawStatusId;
+          } else if (rawStatusId is String) {
+            statusId = int.tryParse(rawStatusId) ?? 0;
+          }
+        }
+
+        if (statusId == 2) {
+          setState(() {
+            print("Approved! Statusid: $statusId");
+            _isApproved = true;
+          });
+        } else {
+          print('Not approved yet (Statusid=$statusId)');
+        }
       }
     } catch (e) {
-      print('Error initializing: $e');
+      print('Error checking approval status: $e');
     }
   }
 
-  Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
-  }
-
-  // Initialize database connection
-  Future<Database> _initDatabase() async {
-    String dbPath = path.join(await getDatabasesPath(), 'production_login.db');
-    return await openDatabase(
-      dbPath,
-      version: 1,
-      // This just connects to existing database
-    );
-  }
-
-  Future<Map<String, dynamic>?> _getLoginData() async {
-    try {
-      final db = await database;
-      final List<Map<String, dynamic>> maps = await db.query(
-        'login_data',
-        orderBy: 'id ASC',
-        limit: 1,
-      );
-
-      if (maps.isNotEmpty) {
-        print('📊 Login data found: ${maps.first}');
-        return maps.first;
-      }
-      print('🔍 No login data found in table');
-      return null;
-    } catch (e) {
-      print('❌ Error getting login data: $e');
-      return null;
-    }
-  }
-
-  // Handler for the refresh button. Shows a spinner while refreshing.
   Future<void> _onRefreshPressed() async {
-    if (_isLoading) return; // prevent double taps
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
     });
     try {
-      await _initializeAndCallAPI();
-      // Optional: give user feedback
+      await _checkApprovalStatus();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Refreshed')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Refreshed')),
+      );
     } catch (e) {
       print('Error during manual refresh: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Refresh failed')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Refresh failed')),
+        );
       }
     } finally {
       if (!mounted) return;
@@ -219,7 +127,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (approvalid == 0) {
+    if (!_isApproved) {
       return Scaffold(
         body: Container(
           width: double.infinity,
@@ -445,13 +353,11 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
       );
     }
 
-    // If approved, navigate to CallsheetDetailScreen immediately
-    // Use a post-frame callback so navigation happens after build
+    // If approved (Statusid == 2), navigate to RoutescreenforDubbingIncharge
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) =>
-              RoutescreenforDubbingIncharge(callsheet: widget.callSheet),
+          builder: (_) => RoutescreenforDubbingIncharge(),
         ),
       );
     });

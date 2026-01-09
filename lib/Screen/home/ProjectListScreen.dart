@@ -154,7 +154,8 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ApprovalScreen(0, callSheet: callSheet),
+
+            builder: (context) => ApprovalScreen(parsedProjectId),
           ),
         );
       }

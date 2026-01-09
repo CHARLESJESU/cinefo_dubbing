@@ -61,10 +61,10 @@ int allowanceid_incharge = 24;
 
 // API Endpoints
 final processRequest = Uri.parse(
-  'https://devvgate.vframework.in/vgateapi/processRequest',
+  'https://vgate.vframework.in/vgateapi/processRequest',
 );
 final processSessionRequest = Uri.parse(
-  'https://devvgate.vframework.in/vgateapi/processSessionRequest',
+  'https://vgate.vframework.in/vgateapi/processSessionRequest',
 );
 
 // VMETID tokens for different operations
@@ -89,9 +89,9 @@ String vmetid_login =
 String vmetid_checktheperson =
     'fG5k1mWf1OZYinDoY0evBxUZghzEKbrAYeHxQXR4rxFG2XqxVC1CgDUhyUMZM7V0ivoycMFgfIQOzKbug+G+bJVI3hz8Y45cPST676lSzGbR5LukGZECqIFu19CtIdhw/5obOGs1ZGE1MwKpebWTDhsfRL6adTdCUWB3YAQ8/a8pXYx8lACaEs9Ri2D2m7d+h+fOcdQQlpdlpdwxxLAVvnee8OYE39miaxpJFULkWCJhXomrQvOZjCGFzjAF9QWZuGshGb2Xl/gOutmzxplKIc8UBSwApq+6NLuaIsHc+MknqhonpGNq5JJQRRXKMXaVYbhdWDPXQZ8QqhfFrGpDTA==';
 // Base URLs for different environments
-String dancebaseurl = "dubbingmember.cinefo.club";
+String dancebaseurl = "dubbingmember.cinefo.com";
 String dancebaseurlfordev = "dubbingmember.cinefo.club";
-String dancebaseurlforproduction = "driversmember.cinefo.com";
+String dancebaseurlforproduction = "dubbingmember.cinefo.com";
 
 String cinefoagent = 'assets/cine agent.png';
 String cinefodriver = 'assets/driver_union_logo.png';
