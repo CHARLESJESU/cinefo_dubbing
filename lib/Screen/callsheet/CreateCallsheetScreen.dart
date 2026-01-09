@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -19,17 +21,12 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
   bool _isLoading = false;
   double _latitude = 0.0;
   double _longitude = 0.0;
-  int _selectedShiftId = 1;
+  int _selectedShiftId = 0;
   String? _defaultCallsheetName;
   DateTime? _selectedDate;
 
-  final List<Map<String, dynamic>> _shifts = [
-    {'id': 1, 'name': 'Select Shift'},
-    {'id': 2, 'name': '2AM - 9AM (Sunrise)'},
-    {'id': 3, 'name': '6AM - 6PM (Regular)'},
-    {'id': 4, 'name': '2PM - 10PM (Evening)'},
-    {'id': 5, 'name': '6PM - 2AM (Night)'},
-    {'id': 6, 'name': '10PM - 6AM (Mid-Night)'},
+  List<Map<String, dynamic>> _shifts = [
+    {'id': 0, 'name': 'Select Shift'},
   ];
 
   @override
@@ -42,6 +39,31 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
 
   Future<void> _initializeData() async {
     await apicalls.fetchloginDataFromSqlite();
+    print("ennada");
+    final shiftResponse = await apicalls.shiftlistshowcaseapi(
+      productiontypeid: productionTypeId.toString() ?? '0',
+    );
+    
+    if (shiftResponse['success'] == true) {
+      try {
+        final responseBody = json.decode(shiftResponse['body']);
+        if (responseBody['responseData'] != null) {
+          final List<dynamic> shiftData = responseBody['responseData'];
+          setState(() {
+            _shifts = [
+              {'id': 0, 'name': 'Select Shift'},
+              ...shiftData.map((shift) => {
+                'id': shift['shiftId'] as int,
+                'name': shift['shift'] as String,
+              }).toList(),
+            ];
+          });
+          print('✅ Loaded ${shiftData.length} shifts from API');
+        }
+      } catch (e) {
+        print('❌ Error parsing shift response: $e');
+      }
+    }
     if (mounted) setState(() {});
   }
 
@@ -133,7 +155,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedShiftId == 1) {
+    if (_selectedShiftId == 0) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Please select a shift")));
@@ -407,7 +429,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
               child: Text(
                 item['name'],
                 style: TextStyle(
-                  color: item['id'] == 1 ? Colors.grey.shade500 : Colors.black,
+                  color: item['id'] == 0 ? Colors.grey.shade500 : Colors.black,
                   fontSize: 14,
                 ),
               ),

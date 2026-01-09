@@ -492,3 +492,60 @@ _checkSessionExpiration(raiserequestresponse.body);
     };
   }
 }
+
+
+Future<Map<String, dynamic>> shiftlistshowcaseapi({
+  required String productiontypeid,
+}) async {
+  try {
+    if (globalloginData == null) await fetchloginDataFromSqlite();
+
+    final payload = 
+ {
+  "productionType": "$productiontypeid"
+}
+    ;
+    print("jdsaj;fkls $payload");
+
+    final shiftlistshowcaseapiresponse = await http.post(
+      processSessionRequest,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'VMETID':
+            'hS1nHKbqxtay7ZfN0tzo5IxtJZLsZXbcVJS90oRm9KRUElvpSu/G/ik57TYlj4PTIfKxYI6P80/LHBjJjUO2XJv2k73r1mhjdd0z1w6z3okJ6uE5+XL1BJiaLjaS+aI7bx7tb9i0Ul8nfe7T059A5AZ6dx5gfML/njWo3K2ltOqcA8sCq7gjijxsKi4JY0LhkGMlHe9D4b+It08K8oHFCpV66R+acr8+iqbiPbWeOn/PphpwA7rDzNkBX5NEvudefosrJ0bfaJpHtMZnh7fYcw1eAAveV7fYc9zxX/W72ILQXlSCFxeeiONi9LfoJsfvkWRS7HtOrtD1x1Q08VeG/w==',
+        'VSID': globalloginData?['vsid'] ??  '',
+      },
+      body: jsonEncode(payload),
+    );
+
+    print(
+      '🚗 shiftlistshowcaseapiresponse Status API Response Status: ${shiftlistshowcaseapiresponse.statusCode}',
+    );
+    print('🚗 shiftlistshowcaseapiresponse Payload: ${payload}');
+    print(
+      '🚗 shiftlistshowcaseapiresponse Status API Response Body: ${shiftlistshowcaseapiresponse.body}',
+    );
+
+    _checkSessionExpiration(shiftlistshowcaseapiresponse.body);
+
+    return {
+      'statusCode': shiftlistshowcaseapiresponse.statusCode,
+      'body': shiftlistshowcaseapiresponse.body,
+      'success': shiftlistshowcaseapiresponse.statusCode == 200,
+    };
+  } catch (e) {
+    _showExceptionSnackBar(
+      e,
+      prefix: e is SocketException ? 'Turn on the network' : null,
+    );
+    print('❌ Error in attendencereportapi: $e');
+    return {
+      'statusCode': 0,
+      'body': '',
+      'success': false,
+      'errorMessage': e is SocketException
+          ? 'Network issue'
+          : 'Something went wrong',
+    };
+  }
+}

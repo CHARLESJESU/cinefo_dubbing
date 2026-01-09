@@ -165,18 +165,12 @@ class _LoginscreenState extends State<Loginscreen> {
               }
             });
 
-            // Save login data conditionally based on unitid (9 for driver, 18 for agent)
-            print('🔄 Login data will be saved only for unitid 9 or 18');
-            // Check if user is a driver (unitid == 9)
+            // Save login data
             if (mounted) {
-              final int? _unitid = loginresponsebody?['unitid'];
-
-              // If unitid == 18 => Agent
-              if (_unitid == 52) {
-                // Save login data for drivers/agents only
+                // Save login data
                 try {
                   print(
-                    '🔄 unitid is ${_unitid} — saving login data to SQLite...',
+                    '🔄 Saving login data to SQLite...',
                   );
                   await LoginSQLiteHelper.saveLoginData(
                     loginresponsebody:
@@ -188,7 +182,7 @@ class _LoginscreenState extends State<Loginscreen> {
                   );
                 } catch (e) {
                   print(
-                    '❌ Error while saving login data for unitid ${_unitid}: $e',
+                    '❌ Error while saving login data: $e',
                   );
                 }
                 // Make additional HTTP request for drivers
@@ -196,10 +190,10 @@ class _LoginscreenState extends State<Loginscreen> {
                   print(
                     '� Checking if user is Incharge or Not (unitid == 5)...',
                   );
-
+  print("Hi appa");
                   // Call InchargeOrNot API after successful login
                   final inchargeApiResponse =
-                      await LoginApiService.checkInchargeOrNot(
+                      await LoginApiService.fetchDriverSession(
                         vmId: loginresponsebody?['responseData']?['vmid'] ?? 0,
                         vsid: loginresponsebody?['vsid']?.toString() ?? "",
                       );
@@ -371,10 +365,6 @@ class _LoginscreenState extends State<Loginscreen> {
                 } catch (e) {
                   print('❌ Error in InchargeOrNot API request: $e');
                 }
-              } else {
-                // Show dialog for non-driver users
-                DialogHelper.showAccessDeniedDialog(context);
-              }
             }
           } else {
             DialogHelper.showMessage(
