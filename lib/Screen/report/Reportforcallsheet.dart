@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
 import 'callsheetmembers.dart';
 import '../../ApiCalls/apicall.dart' as apicalls;
@@ -28,9 +29,10 @@ class _ReportforcallsheeteState extends State<Reportforcallsheet> {
     try {
       // First fetch login data from SQLite
       await apicalls.fetchloginDataFromSqlite();
-      
-      // Then call agent report API
-      final result = await apicalls.agentreportapi();
+    
+      // Then call agent report API with projectId
+      final projectIdInt = int.tryParse(projectId.toString()) ?? 0;
+      final result = await apicalls.agentreportapi(projectIdInt);
       print("🚗 Agent Report API Response: ${result['body']}");
       print("🔍 API Result Success: ${result['success']}");
       print("🔍 API Result Keys: ${result.keys}");

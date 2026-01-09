@@ -1,7 +1,23 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../variables.dart';
+import '../sessionexpired.dart';
+
+// Helper to check for session expiration and navigate if needed
+void _checkSessionExpiration(String responseBody) {
+  try {
+    final decoded = jsonDecode(responseBody);
+    if (decoded is Map && decoded['errordescription'] == "Session Expired") {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (context) => const Sessionexpired()),
+      );
+    }
+  } catch (e) {
+    // If JSON parsing fails, ignore
+  }
+}
 
 /// API Service for Login-related HTTP calls
 class LoginApiService {
@@ -124,6 +140,8 @@ class LoginApiService {
 
       print('🚗 Driver Session API Status: ${response.statusCode}');
       print('🚗 Driver Session API Body: ${response.body}');
+
+      _checkSessionExpiration(response.body);
 
       return {
         'statusCode': response.statusCode,

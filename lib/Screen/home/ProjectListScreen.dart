@@ -1,3 +1,4 @@
+import 'package:cinefo_dubbing/Screen/home/approval_screen.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import '../../common/models/project_model.dart';
@@ -51,10 +52,11 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
         if (response['success'] == true && response['body'] != null) {
           final bodyMap = jsonDecode(response['body']);
-          
-          if (bodyMap['message'] == 'Success' && bodyMap['responseData'] != null) {
+
+          if (bodyMap['message'] == 'Success' &&
+              bodyMap['responseData'] != null) {
             final List<dynamic> responseData = bodyMap['responseData'];
-            
+
             setState(() {
               _projects = responseData
                   .map((data) => ProjectData.fromJson(data))
@@ -62,7 +64,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
               filteredProjects = _projects;
               _isLoading = false;
             });
-            
+
             print('✅ Loaded ${_projects.length} projects from API');
           } else {
             setState(() {
@@ -72,7 +74,8 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
           }
         } else {
           setState(() {
-            _errorMessage = response['errorMessage'] ?? 'Failed to load projects';
+            _errorMessage =
+                response['errorMessage'] ?? 'Failed to load projects';
             _isLoading = false;
           });
         }
@@ -139,55 +142,24 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       print('❌ Error updating SQLite on project selection: $e');
     }
 
-    // Call checkOrRaiseRequestApi
-    if (vmid != null && vsid != null) {
+    // Navigate to ApprovalScreen so it can display and trigger raiserequestapi
+    try {
       final int parsedProjectId = int.tryParse(project.projectId) ?? 0;
+      final Map<String, dynamic> callSheet = {
+        'callSheetId': 0,
+        'projectid': parsedProjectId,
+      };
 
-      final response = await raiserequestapi(parsedProjectId);
-
-      bool isSuccess = false;
-      String errorMessage = 'Failed to verify project request';
-
-      if (response['success'] == true && response['body'] != null) {
-        try {
-          final bodyMap = jsonDecode(response['body']);
-          if (bodyMap['message'] == 'Success') {
-            isSuccess = true;
-          } else {
-            errorMessage = bodyMap['message'] ?? errorMessage;
-          }
-        } catch (e) {
-          print('❌ Error parsing response body: $e');
-        }
-      } else if (response['body'] != null) {
-        // Handle case where success is false but body contains error info
-        try {
-          final bodyMap = jsonDecode(response['body']);
-          final errors = bodyMap['errors'];
-          if (errors != null && errors['error_description'] != null) {
-            errorMessage = errors['error_description'];
-          }
-        } catch (_) {}
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ApprovalScreen(parsedProjectId),
+          ),
+        );
       }
-
-      if (isSuccess) {
-        print('✅ checkOrRaiseRequestApi success, navigating to Dashboard');
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const RoutescreenforDubbingIncharge()),
-          );
-        }
-      } else {
-        print('❌ checkOrRaiseRequestApi failed: $errorMessage');
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-          );
-        }
-      }
-    } else {
-      print('❌ Missing vmid or vsid');
+    } catch (e) {
+      print('❌ Error navigating to ApprovalScreen: $e');
     }
   }
 
@@ -226,80 +198,88 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryLight),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryLight,
+                      ),
                     ),
                   )
                 : _errorMessage != null
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error_outline,
-                                size: 64, color: Colors.red.shade300),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 32),
-                              child: Text(
-                                _errorMessage!,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.red.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: _fetchData,
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Retry'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryLight,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 12,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.red.shade300,
                         ),
-                      )
-                    : filteredProjects.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.inbox_outlined,
-                                    size: 64, color: AppColors.primaryLight.withOpacity(0.5)),
-                                const SizedBox(height: 16),
-                                Text(
-                                  searchQuery.isEmpty
-                                      ? 'No projects available'
-                                      : 'No projects found',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Text(
+                            _errorMessage!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red.shade700,
+                              fontWeight: FontWeight.w500,
                             ),
-                          )
-                        : ListView.builder(
-                            itemCount: filteredProjects.length,
-                            itemBuilder: (context, index) {
-                              final project = filteredProjects[index];
-                              return ProjectListItem(
-                                project: project,
-                                onTap: () => _selectProject(project),
-                              );
-                            },
                           ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton.icon(
+                          onPressed: _fetchData,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryLight,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : filteredProjects.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.inbox_outlined,
+                          size: 64,
+                          color: AppColors.primaryLight.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          searchQuery.isEmpty
+                              ? 'No projects available'
+                              : 'No projects found',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: filteredProjects.length,
+                    itemBuilder: (context, index) {
+                      final project = filteredProjects[index];
+                      return ProjectListItem(
+                        project: project,
+                        onTap: () => _selectProject(project),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -324,9 +304,7 @@ class ProjectListItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 2,
       shadowColor: AppColors.primaryLight.withOpacity(0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
@@ -334,17 +312,11 @@ class ProjectListItem extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border(
-              left: BorderSide(
-                color: AppColors.primaryLight,
-                width: 4,
-              ),
+              left: BorderSide(color: AppColors.primaryLight, width: 4),
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

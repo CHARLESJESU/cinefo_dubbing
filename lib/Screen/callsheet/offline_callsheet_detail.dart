@@ -108,9 +108,18 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
     String createdAtDisplay = createdAtRaw;
     try {
       if (createdAtRaw.isNotEmpty) {
-        final parts = createdAtRaw.split('-');
-        if (parts.length == 3) {
-          createdAtDisplay = "${parts[2]}-${parts[1]}-${parts[0]}";
+        if (createdAtRaw.contains('-')) {
+          // Handle yyyy-mm-dd format
+          final parts = createdAtRaw.split('-');
+          if (parts.length == 3) {
+            createdAtDisplay = "${parts[2]}-${parts[1]}-${parts[0]}";
+          }
+        } else if (createdAtRaw.length == 8) {
+          // Handle yyyymmdd format
+          final year = createdAtRaw.substring(0, 4);
+          final month = createdAtRaw.substring(4, 6);
+          final day = createdAtRaw.substring(6, 8);
+          createdAtDisplay = "$day-$month-$year";
         }
       }
     } catch (_) {}
@@ -322,7 +331,7 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                 ),
                                 Text(
                                   id != null && name.isNotEmpty
-                                      ? "$id-$name"
+                                      ? "$id"
                                       : 'Unknown',
                                   style: TextStyle(
                                     color: Color(0xFF2B5682),
@@ -502,7 +511,33 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                       child: GestureDetector(
                         onTap: enableCloseButton
                             ? () async {
-                                if (id != null) {
+                                final confirmed = await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Confirm Pack Up'),
+                                      content: const Text(
+                                        'Are you sure to pack up this callsheet?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context, false);
+                                          },
+                                          child: const Text('No'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.pop(context, true);
+                                          },
+                                          child: const Text('Yes'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirmed == true && id != null) {
                                   try {
                                     final resp = await closecallsheetapi(
                                       tempId: id,

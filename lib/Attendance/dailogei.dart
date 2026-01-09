@@ -11,9 +11,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:http/http.dart' as http;
 
-
 import '../variables.dart';
-
 String transformVcidToImageUrl(String vcid) {
   final transformedVcid = vcid
       .replaceAll('/', '_')
@@ -95,7 +93,8 @@ class _CountdownDialogState extends State<_CountdownDialog> {
           callsheetid INTEGER,
           mode TEXT,
           attendanceDate TEXT,
-          attendanceTime TEXT
+          attendanceTime TEXT,
+          doubing TEXT
         )
       ''');
       print('DEBUG: Table created/verified successfully');
@@ -124,6 +123,52 @@ class _CountdownDialogState extends State<_CountdownDialog> {
   Timer? _timer;
   bool first = false;
   String responseMessage = "";
+  bool _showRoleSelection = false;
+  
+  // Map to store checkbox states for role selection
+  final Map<String, int> _configMap = {
+    "mainCharacter": 0,
+    "smallCharacter": 0,
+    "bitCharacter": 0,
+    "singlebitCharacter": 0,
+    "group": 0,
+    "fight": 0,
+    "singlebitCharacterOtherLanguage": 0,
+    "mainCharacterOtherLanguage": 0,
+    "smallCharacterOtherLanguage": 0,
+    "bitCharacterOtherLanguage": 0,
+    "groupOtherLanguage": 0,
+    "fightOtherLanguage": 0,
+    "voicetest": 0,
+    "correction": 0,
+    "leadRole": 0,
+    "secondLeadRole": 0,
+    "leadRoleOtherLanguage": 0,
+    "secondLeadRoleOtherLanguage": 0,
+  };
+  
+  final Map<String, String> _labels = {
+    "mainCharacter": "Main Character",
+    "smallCharacter": "Small Character",
+    "bitCharacter": "Bit Character",
+    "singlebitCharacter": "Single Bit Character",
+    "group": "Group",
+    "fight": "Fight",
+    "singlebitCharacterOtherLanguage": "Single Bit Character (Other Language)",
+    "mainCharacterOtherLanguage": "Main Character (Other Language)",
+    "smallCharacterOtherLanguage": "Small Character (Other Language)",
+    "bitCharacterOtherLanguage": "Bit Character (Other Language)",
+    "groupOtherLanguage": "Group (Other Language)",
+    "fightOtherLanguage": "Fight (Other Language)",
+    "voicetest": "Voice Test",
+    "correction": "Correction",
+    "leadRole": "Lead Role",
+    "secondLeadRole": "Second Lead Role",
+    "leadRoleOtherLanguage": "Lead Role (Other Language)",
+    "secondLeadRoleOtherLanguage": "Second Lead Role (Other Language)",
+  };
+  
+  int get _selectedCount => _configMap.values.where((v) => v == 1).length;
 
   void updateDebugMessage(String msg) {
     if (!mounted) return;
@@ -303,6 +348,41 @@ class _CountdownDialogState extends State<_CountdownDialog> {
       }
 
       print('DEBUG: Creating intime data object');
+      
+      // Get doubing config - if attendanceStatus is '2', show role selection UI inline
+      if (widget.attendanceStatus == '2') {
+        print('DEBUG: Attendance status is 2, showing role selection UI');
+        setState(() {
+          _showRoleSelection = true;
+          _isloading = false;
+        });
+        return; // Wait for user to select roles
+      }
+      
+      // Continue with attendance saving (called after role selection or directly if status != '2')
+      await _saveAttendanceData(name, designation, code, unionName, vcid, lat!, lon!, loc!, null);
+    } catch (e) {
+      print('ERROR in markattendance: $e');
+      print('ERROR stack trace: ${e.toString()}');
+    } finally {
+      if (!mounted) return;
+      setState(() => _isloading = false);
+      print('DEBUG: markattendance completed');
+    }
+  }
+  
+  Future<void> _saveAttendanceData(
+    String name,
+    String designation,
+    String code,
+    String unionName,
+    String vcid,
+    String lat,
+    String lon,
+    String loc,
+    Map<String, int>? selectedConfigMap,
+  ) async {
+    try {
       Map<String, dynamic> intimeData = {
         'name': name,
         'designation': designation,
@@ -320,6 +400,28 @@ class _CountdownDialogState extends State<_CountdownDialog> {
         'attendanceDate':
             "${DateTime.now().day.toString().padLeft(2, '0')}-${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().year}",
         'attendanceTime': DateTime.now().toString().split(' ')[1].split('.')[0],
+        'doubing': selectedConfigMap != null
+            ? jsonEncode(selectedConfigMap)
+            : jsonEncode({
+                "mainCharacter": 0,
+                "smallCharacter": 0,
+                "bitCharacter": 0,
+                "singlebitCharacter": 0,
+                "group": 0,
+                "fight": 0,
+                "singlebitCharacterOtherLanguage": 0,
+                "mainCharacterOtherLanguage": 0,
+                "smallCharacterOtherLanguage": 0,
+                "bitCharacterOtherLanguage": 0,
+                "groupOtherLanguage": 0,
+                "fightOtherLanguage": 0,
+                "voicetest": 0,
+                "correction": 0,
+                "leadRole": 0,
+                "secondLeadRole": 0,
+                "leadRoleOtherLanguage": 0,
+                "secondLeadRoleOtherLanguage": 0,
+              }),
       };
       print('DEBUG: Intime data created: $intimeData');
 
@@ -343,17 +445,18 @@ class _CountdownDialogState extends State<_CountdownDialog> {
       Future.delayed(Duration(milliseconds: 800), () {
         print('DEBUG: Closing dialog');
         if (mounted) {
-          Navigator.of(context).pop();
+          // For attendance_status '2', pop twice; for '1', pop once
+          if (widget.attendanceStatus == '2') {
+            Navigator.of(context).pop(); // First pop
+            Navigator.of(context).pop(); // Second pop
+          } else {
+            Navigator.of(context).pop(); // Single pop for status '1'
+          }
           widget.onDismissed();
         }
       });
     } catch (e) {
-      print('ERROR in markattendance: $e');
-      print('ERROR stack trace: ${e.toString()}');
-    } finally {
-      if (!mounted) return;
-      setState(() => _isloading = false);
-      print('DEBUG: markattendance completed');
+      print('ERROR in _saveAttendanceData: $e');
     }
   }
 
@@ -363,6 +466,198 @@ class _CountdownDialogState extends State<_CountdownDialog> {
     final isNfcDisabled = widget.message == "Please Enable NFC From Settings";
     final isAlreadyMarked = responseMessage == "Attendance already marked";
 
+    // Show role selection UI
+    if (_showRoleSelection) {
+      final keys = _configMap.keys.toList();
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade700,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.people_alt, color: Colors.white),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Select Role',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: keys.length,
+                  itemBuilder: (context, index) {
+                    final key = keys[index];
+                    final label = _labels[key] ?? key;
+                    final checked = _configMap[key] == 1;
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: checked ? Colors.blue.shade50 : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: checked ? Colors.blue.shade300 : Colors.grey.shade300,
+                          width: checked ? 2 : 1,
+                        ),
+                      ),
+                      child: CheckboxListTile(
+                        title: Text(
+                          label,
+                          style: TextStyle(
+                            fontWeight: checked ? FontWeight.w600 : FontWeight.w500,
+                            color: checked ? Colors.blue.shade900 : Colors.grey[800],
+                            fontSize: 14,
+                          ),
+                        ),
+                        value: checked,
+                        activeColor: Colors.blue.shade700,
+                        checkColor: Colors.white,
+                        dense: true,
+                        onChanged: (v) {
+                          setState(() {
+                            _configMap[key] = (v == true) ? 1 : 0;
+                          });
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade300),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _showRoleSelection = false;
+                            _isloading = false;
+                            responseMessage = "Attendance cancelled";
+                          });
+                          Future.delayed(Duration(milliseconds: 800), () {
+                            if (mounted) {
+                              Navigator.of(context).pop();
+                              widget.onDismissed();
+                            }
+                          });
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.grey.shade700,
+                          side: BorderSide(color: Colors.grey.shade400),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: _selectedCount == 0 ? null : () async {
+                          setState(() => _isloading = true);
+                          // Extract data from widget.message
+                          String name = '', designation = '', code = '', unionName = '';
+                          final lines = widget.message.split('\n');
+                          for (final line in lines) {
+                            if (line.startsWith('Name:'))
+                              name = line.replaceFirst('Name:', '').trim();
+                            if (line.startsWith('Designation:'))
+                              designation = line.replaceFirst('Designation:', '').trim();
+                            if (line.startsWith('Code:'))
+                              code = line.replaceFirst('Code:', '').trim();
+                            if (line.startsWith('Union Name:'))
+                              unionName = line.replaceFirst('Union Name:', '').trim();
+                          }
+                          
+                          String lat = latitude ?? '', lon = longitude ?? '', loc = location ?? '';
+                          if (lat.isEmpty || lon.isEmpty || loc.isEmpty) {
+                            try {
+                              Position position = await Geolocator.getCurrentPosition(
+                                desiredAccuracy: LocationAccuracy.high,
+                              );
+                              lat = position.latitude.toString();
+                              lon = position.longitude.toString();
+                              List<Placemark> placemarks = await placemarkFromCoordinates(
+                                position.latitude,
+                                position.longitude,
+                              );
+                              Placemark place = placemarks[0];
+                              loc = "${place.name}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+                            } catch (e) {
+                              lat = '';
+                              lon = '';
+                              loc = '';
+                            }
+                          }
+                          
+                          setState(() => _showRoleSelection = false);
+                          await _saveAttendanceData(
+                            name,
+                            designation,
+                            code,
+                            unionName,
+                            widget.vcid,
+                            lat,
+                            lon,
+                            loc,
+                            _configMap,
+                          );
+                          setState(() => _isloading = false);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade700,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: Text(
+                          'Submit ($_selectedCount)',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show normal attendance dialog
     return AlertDialog(
       contentPadding: const EdgeInsets.all(16.0),
       content: Column(
@@ -466,7 +761,8 @@ class IntimeSyncService {
           callsheetid INTEGER,
           mode TEXT,
           attendanceDate TEXT,
-          attendanceTime TEXT
+          attendanceTime TEXT,
+          doubing TEXT
         )
       ''');
 
@@ -486,7 +782,9 @@ class IntimeSyncService {
           "projectid": projectId,
           "productionTypeId": productionTypeId,
           "rfid": row['rfid'],
-          "doubing": {},
+          "doubing": row['doubing'] != null 
+              ? jsonDecode(row['doubing']) 
+              : {},
           "latitude": row['latitude'],
           "longitude": row['longitude'],
           "attendanceStatus": row['attendance_status'],
@@ -515,6 +813,7 @@ class IntimeSyncService {
             print('Error fetching vsid from SQLite: $e');
           }
         }
+        print("Request body : $requestBody");
         print("📊📊📊📊📊📊📊📊📊📊 VSID: $vsid");
         print("📊📊📊📊📊📊📊📊📊📊 Request Body: $processSessionRequest");
         final response = await http.post(

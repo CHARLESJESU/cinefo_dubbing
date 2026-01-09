@@ -139,6 +139,12 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
       ).showSnackBar(const SnackBar(content: Text("Please select a shift")));
       return;
     }
+    if (_selectedDate == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please select a date")));
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -149,6 +155,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
       final createdAtTime = DateFormat('HH:mm:ss').format(now);
 
       final result = await apicalls.createCallSheetApi(
+        selectedDate: DateFormat('dd-MM-yyyy').format(_selectedDate!),
         callsheetname: _nameController.text.trim(),
         shiftId: _selectedShiftId,
         latitude: _latitude,
@@ -160,8 +167,33 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         createdDate: createdDate,
         createdAtTime: createdAtTime,
       );
-
-      if (result['success']) {
+      print("Create callsheet result: ${result['body']}");
+      
+      // Check for status 1030
+      if (result['data'] != null && 
+          (result['data']["status"] == "1030" || result['data']["status"] == 1030)) {
+        final message = result['data']["message"] ?? 'An error occurred';
+        if (mounted) {
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Notice'),
+                content: Text(message),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close dialog
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+          Navigator.pop(context); // Navigate back
+        }
+      } else if (result['success']) {
         _showSuccess("Callsheet created successfully!");
         Navigator.pop(context);
       } else {
@@ -169,7 +201,8 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         _showError(err);
       }
     } catch (e) {
-      _showError('Something went wrong');
+      print("Error in _submitForm: $e");
+      _showError('Something went wrong: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
