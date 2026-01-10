@@ -9,6 +9,35 @@ import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 
+// Responsive helper class
+class ResponsiveHelper {
+  final BuildContext context;
+  late double screenWidth;
+  late double screenHeight;
+
+  ResponsiveHelper(this.context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+  }
+
+  static const double baseWidth = 393.0;
+  static const double baseHeight = 852.0;
+
+  double wp(double percentage) => screenWidth * percentage / 100;
+  double hp(double percentage) => screenHeight * percentage / 100;
+  double sw(double size) => size * screenWidth / baseWidth;
+  double sh(double size) => size * screenHeight / baseHeight;
+  double sp(double size) {
+    double scaleFactor = screenWidth / baseWidth;
+    return (size * scaleFactor).clamp(size * 0.8, size * 1.3);
+  }
+
+  double radius(double size) => sw(size);
+  double iconSize(double size) => sw(size).clamp(size * 0.8, size * 1.5);
+  bool get isSmallPhone => screenWidth < 360;
+  bool get isTablet => screenWidth >= 600;
+}
+
 class OfflineCallsheetDetailScreen extends StatelessWidget {
   final Map<String, dynamic> callsheet;
   const OfflineCallsheetDetailScreen({Key? key, required this.callsheet})
@@ -189,36 +218,47 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
     bool enableCloseButton =
         isToday || isPastDate || dateParseError || callsheetDate == null;
 
+    final responsive = ResponsiveHelper(context);
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        toolbarHeight: responsive.sh(56),
         title: Text(
           'Callsheet Details',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: responsive.sp(18),
+          ),
         ),
         backgroundColor: const Color(0xFF2B5682),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+            size: responsive.iconSize(24),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       backgroundColor: const Color.fromRGBO(247, 244, 244, 1),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(responsive.sw(20)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
-                padding: EdgeInsets.all(20),
+                padding: EdgeInsets.all(responsive.sw(20)),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(responsive.radius(20)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: Offset(0, 5),
+                      blurRadius: responsive.sw(10),
+                      offset: Offset(0, responsive.sh(5)),
                     ),
                   ],
                 ),
@@ -229,76 +269,92 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                       child: Text(
                         Moviename ?? 'Unknown',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: responsive.sp(24),
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2B5682),
+                          color: const Color(0xFF2B5682),
                         ),
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: responsive.sh(20)),
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            height: 70,
-                            padding: EdgeInsets.all(12),
+                            constraints: BoxConstraints(
+                              minHeight: responsive.sh(70),
+                            ),
+                            padding: EdgeInsets.all(responsive.sw(12)),
                             decoration: BoxDecoration(
                               color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(10),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   "Date",
                                   style: TextStyle(
                                     color: Colors.grey[600],
-                                    fontSize: 12,
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                SizedBox(height: responsive.sh(4)),
                                 Text(
                                   createdAtDisplay,
                                   style: TextStyle(
-                                    color: Color(0xFF2B5682),
-                                    fontSize: 12,
+                                    color: const Color(0xFF2B5682),
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: responsive.sw(12)),
                         Expanded(
                           child: Container(
-                            height: 70,
-                            padding: EdgeInsets.all(12),
+                            constraints: BoxConstraints(
+                              minHeight: responsive.sh(70),
+                            ),
+                            padding: EdgeInsets.all(responsive.sw(12)),
                             decoration: BoxDecoration(
                               color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(10),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   "Time",
                                   style: TextStyle(
                                     color: Colors.grey[600],
-                                    fontSize: 12,
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                SizedBox(height: responsive.sh(4)),
                                 Text(
                                   time ?? 'Unknown',
                                   style: TextStyle(
-                                    color: Color(0xFF2B5682),
-                                    fontSize: 8,
+                                    color: const Color(0xFF2B5682),
+                                    fontSize: responsive.sp(10),
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
@@ -306,78 +362,92 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: responsive.sh(15)),
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                            height: 70,
-                            padding: EdgeInsets.all(12),
+                            constraints: BoxConstraints(
+                              minHeight: responsive.sh(70),
+                            ),
+                            padding: EdgeInsets.all(responsive.sw(12)),
                             decoration: BoxDecoration(
                               color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(10),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   "ID",
                                   style: TextStyle(
                                     color: Colors.grey[600],
-                                    fontSize: 12,
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                SizedBox(height: responsive.sh(4)),
                                 Text(
                                   id != null && name.isNotEmpty
                                       ? "$id"
                                       : 'Unknown',
                                   style: TextStyle(
-                                    color: Color(0xFF2B5682),
-                                    fontSize: 12,
+                                    color: const Color(0xFF2B5682),
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: responsive.sw(12)),
                         Expanded(
                           child: Container(
-                            height: 100,
-                            padding: EdgeInsets.all(12),
+                            constraints: BoxConstraints(
+                              minHeight: responsive.sh(70),
+                            ),
+                            padding: EdgeInsets.all(responsive.sw(12)),
                             decoration: BoxDecoration(
                               color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(10),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
                                   "Location",
                                   style: TextStyle(
                                     color: Colors.grey[600],
-                                    fontSize: 12,
+                                    fontSize: responsive.sp(12),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
+                                SizedBox(height: responsive.sh(4)),
                                 Builder(
                                   builder: (context) {
                                     final loc = location ?? 'Unknown';
-                                    double fontSize = 12;
+                                    double fontSize = responsive.sp(12);
                                     if (loc.length > 40) {
-                                      fontSize = 9;
+                                      fontSize = responsive.sp(9);
                                     }
                                     if (loc.length > 80) {
-                                      fontSize = 7;
+                                      fontSize = responsive.sp(7);
                                     }
                                     return Text(
                                       loc,
                                       style: TextStyle(
-                                        color: Color(0xFF2B5682),
+                                        color: const Color(0xFF2B5682),
                                         fontSize: fontSize,
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -392,12 +462,16 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 25),
+                    SizedBox(height: responsive.sh(25)),
                     Container(
-                      padding: EdgeInsets.symmetric(vertical: 15),
+                      padding: EdgeInsets.symmetric(
+                        vertical: responsive.sh(15),
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(
+                          responsive.radius(15),
+                        ),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -439,6 +513,7 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                   ? AppColors.primaryLight
                                   : Colors.grey,
                               enabled: enableAttendanceButtons,
+                              responsive: responsive,
                             ),
                           ),
                           GestureDetector(
@@ -476,6 +551,7 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                   ? AppColors.primaryLight
                                   : Colors.grey,
                               enabled: enableAttendanceButtons,
+                              responsive: responsive,
                             ),
                           ),
                           if (productionTypeId != 3)
@@ -500,12 +576,13 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                     ? AppColors.primaryLight
                                     : Colors.grey,
                                 enabled: enableAttendanceButtons,
+                                responsive: responsive,
                               ),
                             ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: responsive.sh(20)),
                     Opacity(
                       opacity: enableCloseButton ? 1.0 : 0.5,
                       child: GestureDetector(
@@ -515,22 +592,40 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: const Text('Confirm Pack Up'),
-                                      content: const Text(
+                                      title: Text(
+                                        'Confirm Pack Up',
+                                        style: TextStyle(
+                                          fontSize: responsive.sp(18),
+                                        ),
+                                      ),
+                                      content: Text(
                                         'Are you sure to pack up this callsheet?',
+                                        style: TextStyle(
+                                          fontSize: responsive.sp(14),
+                                        ),
                                       ),
                                       actions: [
                                         TextButton(
                                           onPressed: () {
                                             Navigator.pop(context, false);
                                           },
-                                          child: const Text('No'),
+                                          child: Text(
+                                            'No',
+                                            style: TextStyle(
+                                              fontSize: responsive.sp(14),
+                                            ),
+                                          ),
                                         ),
                                         TextButton(
                                           onPressed: () {
                                             Navigator.pop(context, true);
                                           },
-                                          child: const Text('Yes'),
+                                          child: Text(
+                                            'Yes',
+                                            style: TextStyle(
+                                              fontSize: responsive.sp(14),
+                                            ),
+                                          ),
                                         ),
                                       ],
                                     );
@@ -573,12 +668,16 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                             : null,
                         child: Container(
                           width: double.infinity,
-                          padding: EdgeInsets.symmetric(vertical: 15),
+                          padding: EdgeInsets.symmetric(
+                            vertical: responsive.sh(15),
+                          ),
                           decoration: BoxDecoration(
                             color: enableCloseButton
                                 ? Colors.red.withOpacity(0.1)
                                 : Colors.grey.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                              responsive.radius(12),
+                            ),
                             border: Border.all(
                               color: enableCloseButton
                                   ? Colors.red.withOpacity(0.3)
@@ -594,13 +693,13 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
                                 color: enableCloseButton
                                     ? Colors.red
                                     : Colors.grey,
-                                size: 20,
+                                size: responsive.iconSize(20),
                               ),
-                              SizedBox(width: 8),
+                              SizedBox(width: responsive.sw(8)),
                               Text(
                                 "Pack Up",
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: responsive.sp(16),
                                   fontWeight: FontWeight.w600,
                                   color: enableCloseButton
                                       ? Colors.red
@@ -627,6 +726,7 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
     IconData icon,
     Color color, {
     bool enabled = true,
+    required ResponsiveHelper responsive,
   }) {
     return Opacity(
       opacity: enabled ? 1.0 : 0.5,
@@ -634,18 +734,18 @@ class OfflineCallsheetDetailScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(12),
+            padding: EdgeInsets.all(responsive.sw(12)),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(responsive.radius(12)),
             ),
-            child: Icon(icon, color: color, size: 30),
+            child: Icon(icon, color: color, size: responsive.iconSize(30)),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: responsive.sh(8)),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: responsive.sp(12),
               fontWeight: FontWeight.w600,
               color: enabled ? Colors.black87 : Colors.grey,
             ),

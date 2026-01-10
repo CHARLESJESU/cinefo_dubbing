@@ -5,6 +5,34 @@ import 'package:cinefo_dubbing/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+// Responsive helper class
+class ResponsiveHelper {
+  final BuildContext context;
+  late double screenWidth;
+  late double screenHeight;
+
+  ResponsiveHelper(this.context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+  }
+
+  static const double baseWidth = 393.0;
+  static const double baseHeight = 852.0;
+
+  double wp(double percentage) => screenWidth * percentage / 100;
+  double hp(double percentage) => screenHeight * percentage / 100;
+  double sw(double size) => size * screenWidth / baseWidth;
+  double sh(double size) => size * screenHeight / baseHeight;
+  double sp(double size) {
+    double scaleFactor = screenWidth / baseWidth;
+    return (size * scaleFactor).clamp(size * 0.8, size * 1.3);
+  }
+
+  double radius(double size) => sw(size);
+  double iconSize(double size) => sw(size).clamp(size * 0.8, size * 1.5);
+  bool get isSmallPhone => screenWidth < 360;
+  bool get isTablet => screenWidth >= 600;
+}
 
 class Callsheetmembers extends StatefulWidget {
   final String projectId;
@@ -28,14 +56,13 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
     print(widget.maincallsheetid);
     print(dubbingunitid);
     print(globalloginData?['vsid'] ?? '');
-    
-//api call
+
+    //api call
     try {
-      
       final result = await attendencereportapi(
         callsheetid: widget.maincallsheetid,
       );
-      
+
       if (result['success'] == true && result['statusCode'] == 200) {
         print("${result['body']}✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ");
         final decoded = jsonDecode(result['body']);
@@ -73,8 +100,10 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
         Map error = jsonDecode(result['body']);
         print(error);
         if (error['errordescription'] == "Session Expired") {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const Sessionexpired()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Sessionexpired()),
+          );
         }
         setState(() {
           isLoading = false;
@@ -94,6 +123,8 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -101,25 +132,34 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: responsive.hp(2.5)),
               Container(
-                width: MediaQuery.of(context).size.width,
-                height: 80,
+                width: responsive.screenWidth,
+                height: responsive.sh(80),
                 color: Colors.white,
                 child: Padding(
-                  padding: EdgeInsets.only(left: 30, top: 20),
+                  padding: EdgeInsets.only(
+                    left: responsive.sw(30),
+                    top: responsive.sh(20),
+                  ),
                   child: Row(
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: Icon(Icons.arrow_back),
+                        child: Icon(
+                          Icons.arrow_back,
+                          size: responsive.iconSize(24),
+                        ),
                       ),
-                      SizedBox(width: 20),
-                      Text(
-                        "Callsheet Attendance Details",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+                      SizedBox(width: responsive.sw(20)),
+                      Expanded(
+                        child: Text(
+                          "Callsheet Attendance Details",
+                          style: TextStyle(
+                            fontSize: responsive.sp(14),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -127,12 +167,16 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 20, right: 20, top: 20),
+                padding: EdgeInsets.only(
+                  left: responsive.sw(20),
+                  right: responsive.sw(20),
+                  top: responsive.sh(20),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 50,
+                      height: responsive.sh(50),
                       decoration: BoxDecoration(
                         color: Color.fromRGBO(228, 215, 248, 1),
                         border: Border.all(
@@ -141,37 +185,49 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
                       ),
                       child: Row(
                         children: [
-                          SizedBox(width: 10),
+                          SizedBox(width: responsive.sw(10)),
                           Expanded(
                             flex: 2,
-                            child: Text('Code',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(131, 77, 218, 1),
-                                )),
+                            child: Text(
+                              'Code',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: responsive.sp(12),
+                                color: Color.fromRGBO(131, 77, 218, 1),
+                              ),
+                            ),
                           ),
                           Expanded(
                             flex: 3,
-                            child: Text('Name',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(131, 77, 218, 1),
-                                )),
+                            child: Text(
+                              'Name',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: responsive.sp(12),
+                                color: Color.fromRGBO(131, 77, 218, 1),
+                              ),
+                            ),
                           ),
                           Expanded(
-                            child: Text('In Time',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(131, 77, 218, 1),
-                                )),
+                            child: Text(
+                              'In Time',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: responsive.sp(11),
+                                color: Color.fromRGBO(131, 77, 218, 1),
+                              ),
+                            ),
                           ),
-                          SizedBox(width: 20),
+                          SizedBox(width: responsive.sw(10)),
                           Expanded(
-                            child: Text('Out Time',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(131, 77, 218, 1),
-                                )),
+                            child: Text(
+                              'Out Time',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: responsive.sp(11),
+                                color: Color.fromRGBO(131, 77, 218, 1),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -181,24 +237,66 @@ class _CallsheetmembersState extends State<Callsheetmembers> {
               ),
               Expanded(
                 child: isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? Center(
+                        child: SizedBox(
+                          width: responsive.sw(40),
+                          height: responsive.sw(40),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
                     : ListView.builder(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: responsive.sw(20),
+                          vertical: responsive.sh(10),
+                        ),
                         itemCount: reportData.length,
                         itemBuilder: (context, index) {
                           final entry = reportData[index];
                           return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(
+                              vertical: responsive.sh(10),
+                            ),
                             child: Row(
                               children: [
                                 Expanded(
-                                    flex: 2, child: Text(entry.code ?? "--")),
+                                  flex: 2,
+                                  child: Text(
+                                    entry.code ?? "--",
+                                    style: TextStyle(
+                                      fontSize: responsive.sp(12),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                                 Expanded(
-                                    flex: 3, child: Text(entry.memberName)),
-                                Expanded(child: Text(entry.inTime ?? "--")),
-                                SizedBox(width: 20),
-                                Expanded(child: Text(entry.outTime ?? "--")),
+                                  flex: 3,
+                                  child: Text(
+                                    entry.memberName,
+                                    style: TextStyle(
+                                      fontSize: responsive.sp(12),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    entry.inTime ?? "--",
+                                    style: TextStyle(
+                                      fontSize: responsive.sp(11),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: responsive.sw(10)),
+                                Expanded(
+                                  child: Text(
+                                    entry.outTime ?? "--",
+                                    style: TextStyle(
+                                      fontSize: responsive.sp(11),
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
                               ],
                             ),
                           );

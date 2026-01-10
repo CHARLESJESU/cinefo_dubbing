@@ -40,7 +40,7 @@ dependencies:
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
   url_launcher: ^6.3.2
-  intl: ^0.18.1
+  intl: ^0.20.2
   encrypt:
   nfc_manager: ^4.1.1
   nfc_manager_ndef: ^1.1.0
@@ -60,6 +60,7 @@ dependencies:
 
   package_info_plus: ^8.3.1
   pin_code_fields: ^8.0.1
+  device_preview: ^1.3.1
 
 dev_dependencies:
   flutter_test:

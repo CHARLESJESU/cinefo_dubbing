@@ -6,7 +6,54 @@ import '../../Login/loginscreen.dart';
 import '../Profile/ProfileScreen.dart';
 import 'package:cinefo_dubbing/Login/password/changepasswordscreen.dart';
 import 'SqlitelistScreen.dart';
-import 'roleuidialog.dart';
+
+// Responsive helper class
+class ResponsiveHelper {
+  final BuildContext context;
+  late double screenWidth;
+  late double screenHeight;
+  late double textScaleFactor;
+
+  ResponsiveHelper(this.context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+    textScaleFactor = MediaQuery.of(context).textScaleFactor.clamp(0.8, 1.2);
+  }
+
+  // Base width for calculations (iPhone 14 Pro width)
+  static const double baseWidth = 393.0;
+  static const double baseHeight = 852.0;
+
+  // Get responsive width
+  double wp(double percentage) => screenWidth * percentage / 100;
+
+  // Get responsive height
+  double hp(double percentage) => screenHeight * percentage / 100;
+
+  // Get scaled width based on design width
+  double sw(double size) => size * screenWidth / baseWidth;
+
+  // Get scaled height based on design height
+  double sh(double size) => size * screenHeight / baseHeight;
+
+  // Get responsive font size
+  double sp(double size) {
+    double scaleFactor = screenWidth / baseWidth;
+    return (size * scaleFactor).clamp(size * 0.8, size * 1.3);
+  }
+
+  // Get responsive radius
+  double radius(double size) => sw(size);
+
+  // Get responsive icon size
+  double iconSize(double size) => sw(size).clamp(size * 0.8, size * 1.5);
+
+  // Check device type
+  bool get isSmallPhone => screenWidth < 360;
+  bool get isPhone => screenWidth >= 360 && screenWidth < 600;
+  bool get isTablet => screenWidth >= 600 && screenWidth < 900;
+  bool get isLargeTablet => screenWidth >= 900;
+}
 
 class MyHomeScreen extends StatefulWidget {
   const MyHomeScreen({super.key});
@@ -182,6 +229,8 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+
     return Stack(
       children: [
         Container(
@@ -195,354 +244,20 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
-          endDrawer: Drawer(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2B5682), Color(0xFF24426B)],
-                ),
-              ),
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  DrawerHeader(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0xFF2B5682), Color(0xFF24426B)],
-                      ),
-                    ),
-                    child: Center(
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.white,
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/Dubbing.jpeg',
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.movie,
-                                  color: Color(0xFF2B5682),
-                                  size: 40,
-                                ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // View Profile
-                  ListTile(
-                    leading: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    title: const Text(
-                      'View Profile',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer first
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProfileScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // White separator line
-                  Divider(
-                    color: Colors.white.withOpacity(0.3),
-                    thickness: 1,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
-
-                 
-
-                  // Change Password
-                  ListTile(
-                    leading: const Icon(
-                      Icons.lock,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    title: const Text(
-                      'Change Password',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer first
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ChangepasswordScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // White separator line
-                  Divider(
-                    color: Colors.white.withOpacity(0.3),
-                    thickness: 1,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
-
-                  // Logout
-                  ListTile(
-                    leading: const Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    title: const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer first
-                      _showLogoutDialog(context);
-                    },
-                  ),
-                  Divider(
-                    color: Colors.white.withOpacity(0.3),
-                    thickness: 1,
-                    indent: 16,
-                    endIndent: 16,
-                  ),
-                  ListTile(
-                    leading: const Icon(
-                      Icons.sync,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    title: const Text(
-                      'vSync',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onTap: () {
-                      Navigator.pop(context); // Close drawer first
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Sqlitelist()),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Image.asset(
-                'assets/cinefo-logo.png',
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.movie, color: Colors.white),
-              ),
-            ),
-            actions: [
-              // IconButton(
-              //   icon: const Icon(Icons.notifications),
-              //   color: Colors.white,
-              //   iconSize: 24,
-              //   onPressed: () {
-              //     // TODO: Implement navigation to Approvalstatus
-              //   },
-              // ),
-              Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white),
-                  onPressed: () {
-                    Scaffold.of(context).openEndDrawer();
-                  },
-                ),
-              ),
-            ],
-          ),
+          endDrawer: _buildDrawer(context, responsive),
+          appBar: _buildAppBar(context, responsive),
           body: RefreshIndicator(
             onRefresh: _fetchLoginData,
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 100),
+                padding: EdgeInsets.only(bottom: responsive.hp(12)),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF355E8C),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 20),
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Colors.white.withOpacity(0.2),
-                              child:
-                                  (_profileImage != null &&
-                                      _profileImage!.isNotEmpty &&
-                                      _profileImage!.toLowerCase() != 'unknown')
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        _profileImage!,
-                                        width: 80,
-                                        height: 80,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.person,
-                                                  size: 40,
-                                                  color: Colors.white,
-                                                ),
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      size: 40,
-                                      color: Colors.white,
-                                    ),
-                            ),
-                            const SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _managerName ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    _designation ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                  Text(
-                                    _mobileNumber ?? '',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.white70,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 25),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xFF4A6FA5), Color(0xFF2E4B73)],
-                          ),
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      _registeredMovie ??
-                                          'No Project Selection',
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Text(
-                                      _productionHouse ?? 'N/A',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white.withOpacity(0.8),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.15),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.3),
-                                    width: 2,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: 35,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: responsive.hp(2.5)),
+                    _buildProfileCard(responsive),
+                    SizedBox(height: responsive.hp(3)),
+                    _buildProjectCard(responsive),
                   ],
                 ),
               ),
@@ -550,6 +265,356 @@ class _MyHomeScreenState extends State<MyHomeScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  // Build responsive drawer
+  Widget _buildDrawer(BuildContext context, ResponsiveHelper responsive) {
+    return Drawer(
+      width: responsive.isTablet ? responsive.wp(50) : responsive.wp(75),
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF2B5682), Color(0xFF24426B)],
+          ),
+        ),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF2B5682), Color(0xFF24426B)],
+                ),
+              ),
+              child: Center(
+                child: CircleAvatar(
+                  radius: responsive.sw(40),
+                  backgroundColor: Colors.white,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'assets/Dubbing.jpeg',
+                      width: responsive.sw(80),
+                      height: responsive.sw(80),
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.movie,
+                        color: const Color(0xFF2B5682),
+                        size: responsive.iconSize(40),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            _buildDrawerItem(
+              context,
+              responsive,
+              icon: Icons.person,
+              title: 'View Profile',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerDivider(responsive),
+            _buildDrawerItem(
+              context,
+              responsive,
+              icon: Icons.lock,
+              title: 'Change Password',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ChangepasswordScreen(),
+                  ),
+                );
+              },
+            ),
+            _buildDrawerDivider(responsive),
+            _buildDrawerItem(
+              context,
+              responsive,
+              icon: Icons.logout,
+              title: 'Logout',
+              onTap: () {
+                Navigator.pop(context);
+                _showLogoutDialog(context);
+              },
+            ),
+            _buildDrawerDivider(responsive),
+            _buildDrawerItem(
+              context,
+              responsive,
+              icon: Icons.sync,
+              title: 'vSync',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Sqlitelist()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(
+    BuildContext context,
+    ResponsiveHelper responsive, {
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: responsive.sw(16),
+        vertical: responsive.sh(4),
+      ),
+      leading: Icon(icon, color: Colors.white, size: responsive.iconSize(24)),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: responsive.sp(16),
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildDrawerDivider(ResponsiveHelper responsive) {
+    return Divider(
+      color: Colors.white.withOpacity(0.3),
+      thickness: 1,
+      indent: responsive.sw(16),
+      endIndent: responsive.sw(16),
+    );
+  }
+
+  // Build responsive app bar
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    ResponsiveHelper responsive,
+  ) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      toolbarHeight: responsive.sh(56),
+      leading: Padding(
+        padding: EdgeInsets.all(responsive.sw(10)),
+        child: Image.asset(
+          'assets/cinefo-logo.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.movie,
+            color: Colors.white,
+            size: responsive.iconSize(24),
+          ),
+        ),
+      ),
+      actions: [
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(
+              Icons.menu,
+              color: Colors.white,
+              size: responsive.iconSize(24),
+            ),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Build responsive profile card
+  Widget _buildProfileCard(ResponsiveHelper responsive) {
+    final double avatarRadius = responsive.sw(40).clamp(30.0, 55.0);
+    final double avatarImageSize = avatarRadius * 2;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: responsive.wp(7.5)),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: responsive.sh(20),
+          horizontal: responsive.sw(10),
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF355E8C),
+          borderRadius: BorderRadius.circular(responsive.radius(20)),
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: responsive.sw(15)),
+            CircleAvatar(
+              radius: avatarRadius,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              child:
+                  (_profileImage != null &&
+                      _profileImage!.isNotEmpty &&
+                      _profileImage!.toLowerCase() != 'unknown')
+                  ? ClipOval(
+                      child: Image.network(
+                        _profileImage!,
+                        width: avatarImageSize,
+                        height: avatarImageSize,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.person,
+                          size: responsive.iconSize(40),
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.person,
+                      size: responsive.iconSize(40),
+                      color: Colors.white,
+                    ),
+            ),
+            SizedBox(width: responsive.sw(15)),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _managerName ?? '',
+                    style: TextStyle(
+                      fontSize: responsive.sp(18),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: responsive.sh(4)),
+                  Text(
+                    _designation ?? '',
+                    style: TextStyle(
+                      fontSize: responsive.sp(14),
+                      color: Colors.white70,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: responsive.sh(2)),
+                  Text(
+                    _mobileNumber ?? '',
+                    style: TextStyle(
+                      fontSize: responsive.sp(14),
+                      color: Colors.white70,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: responsive.sw(10)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build responsive project card
+  Widget _buildProjectCard(ResponsiveHelper responsive) {
+    final double cardHeight = responsive.sh(120).clamp(100.0, 160.0);
+    final double iconContainerSize = responsive.sw(50).clamp(40.0, 65.0);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: responsive.wp(7.5)),
+      child: Container(
+        height: cardHeight,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF4A6FA5), Color(0xFF2E4B73)],
+          ),
+          borderRadius: BorderRadius.circular(responsive.radius(15)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: responsive.sw(10),
+              offset: Offset(0, responsive.sh(5)),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(responsive.sw(20)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _registeredMovie ?? 'No Project Selection',
+                      style: TextStyle(
+                        fontSize: responsive.sp(16),
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: responsive.sh(5)),
+                    Text(
+                      _productionHouse ?? 'N/A',
+                      style: TextStyle(
+                        fontSize: responsive.sp(14),
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: responsive.sw(10)),
+              Container(
+                width: iconContainerSize,
+                height: iconContainerSize,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: responsive.sw(2),
+                  ),
+                ),
+                child: Icon(
+                  Icons.play_arrow,
+                  color: Colors.white,
+                  size: responsive.iconSize(35),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

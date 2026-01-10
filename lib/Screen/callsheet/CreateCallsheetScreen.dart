@@ -6,6 +6,35 @@ import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import '../../ApiCalls/apicall.dart' as apicalls;
 
+// Responsive helper class
+class ResponsiveHelper {
+  final BuildContext context;
+  late double screenWidth;
+  late double screenHeight;
+
+  ResponsiveHelper(this.context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+  }
+
+  static const double baseWidth = 393.0;
+  static const double baseHeight = 852.0;
+
+  double wp(double percentage) => screenWidth * percentage / 100;
+  double hp(double percentage) => screenHeight * percentage / 100;
+  double sw(double size) => size * screenWidth / baseWidth;
+  double sh(double size) => size * screenHeight / baseHeight;
+  double sp(double size) {
+    double scaleFactor = screenWidth / baseWidth;
+    return (size * scaleFactor).clamp(size * 0.8, size * 1.3);
+  }
+
+  double radius(double size) => sw(size);
+  double iconSize(double size) => sw(size).clamp(size * 0.8, size * 1.5);
+  bool get isSmallPhone => screenWidth < 360;
+  bool get isTablet => screenWidth >= 600;
+}
+
 class CreateCallsheetScreen extends StatefulWidget {
   const CreateCallsheetScreen({super.key});
 
@@ -43,7 +72,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     final shiftResponse = await apicalls.shiftlistshowcaseapi(
       productiontypeid: productionTypeId.toString() ?? '0',
     );
-    
+
     if (shiftResponse['success'] == true) {
       try {
         final responseBody = json.decode(shiftResponse['body']);
@@ -52,10 +81,14 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
           setState(() {
             _shifts = [
               {'id': 0, 'name': 'Select Shift'},
-              ...shiftData.map((shift) => {
-                'id': shift['shiftId'] as int,
-                'name': shift['shift'] as String,
-              }).toList(),
+              ...shiftData
+                  .map(
+                    (shift) => {
+                      'id': shift['shiftId'] as int,
+                      'name': shift['shift'] as String,
+                    },
+                  )
+                  .toList(),
             ];
           });
           print('✅ Loaded ${shiftData.length} shifts from API');
@@ -190,10 +223,11 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
         createdAtTime: createdAtTime,
       );
       print("Create callsheet result: ${result['body']}");
-      
+
       // Check for status 1030
-      if (result['data'] != null && 
-          (result['data']["status"] == "1030" || result['data']["status"] == 1030)) {
+      if (result['data'] != null &&
+          (result['data']["status"] == "1030" ||
+              result['data']["status"] == 1030)) {
         final message = result['data']["message"] ?? 'An error occurred';
         if (mounted) {
           await showDialog(
@@ -244,55 +278,66 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        toolbarHeight: responsive.sh(56),
+        title: Text(
           "Create callsheet",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: responsive.sp(18),
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+            size: responsive.iconSize(24),
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: EdgeInsets.all(responsive.sw(20)),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Add Your Details",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: responsive.sp(20),
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.sh(20)),
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(responsive.sw(20)),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(25),
+                    borderRadius: BorderRadius.circular(responsive.radius(25)),
                     border: Border.all(color: Colors.grey.shade100),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.03),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
+                        blurRadius: responsive.sw(15),
+                        offset: Offset(0, responsive.sh(8)),
                       ),
                     ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildFieldLabel("Shift"),
+                      _buildFieldLabel("Shift", responsive),
                       _buildDropdownField(
                         value: _selectedShiftId,
                         items: _shifts,
@@ -318,26 +363,28 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
                             }
                           });
                         },
+                        responsive: responsive,
                       ),
-                      const SizedBox(height: 15),
-                      _buildFieldLabel("Date"),
-                      _buildDatePickerField(),
-                      const SizedBox(height: 15),
-                      _buildFieldLabel("Callsheet name"),
+                      SizedBox(height: responsive.sh(15)),
+                      _buildFieldLabel("Date", responsive),
+                      _buildDatePickerField(responsive),
+                      SizedBox(height: responsive.sh(15)),
+                      _buildFieldLabel("Callsheet name", responsive),
                       _buildTextField(
                         controller: _nameController,
                         hint: "Enter callsheet name",
+                        responsive: responsive,
                       ),
-                      const SizedBox(height: 15),
-                      _buildFieldLabel("Location"),
-                      _buildLocationField(),
+                      SizedBox(height: responsive.sh(15)),
+                      _buildFieldLabel("Location", responsive),
+                      _buildLocationField(responsive),
                     ],
                   ),
                 ),
-                const SizedBox(height: 30),
+                SizedBox(height: responsive.sh(30)),
                 SizedBox(
                   width: double.infinity,
-                  height: 55,
+                  height: responsive.sh(55),
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
@@ -345,21 +392,29 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(
+                          responsive.radius(15),
+                        ),
                       ),
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
+                        ? SizedBox(
+                            width: responsive.sw(24),
+                            height: responsive.sw(24),
+                            child: const CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
                             "Create",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: responsive.sp(18),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: responsive.sh(20)),
               ],
             ),
           ),
@@ -368,13 +423,13 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     );
   }
 
-  Widget _buildFieldLabel(String label) {
+  Widget _buildFieldLabel(String label, ResponsiveHelper responsive) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: EdgeInsets.only(bottom: responsive.sh(8)),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 15,
+        style: TextStyle(
+          fontSize: responsive.sp(15),
           fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
@@ -385,21 +440,26 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
   Widget _buildTextField({
     required TextEditingController controller,
     required String hint,
+    required ResponsiveHelper responsive,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(responsive.radius(15)),
       ),
       child: TextFormField(
         controller: controller,
+        style: TextStyle(fontSize: responsive.sp(14)),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400,
+            fontSize: responsive.sp(14),
+          ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: responsive.sw(16),
+            vertical: responsive.sh(12),
           ),
         ),
         validator: (value) =>
@@ -412,13 +472,14 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     required int value,
     required List<Map<String, dynamic>> items,
     required Function(int?) onChanged,
+    required ResponsiveHelper responsive,
   }) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(responsive.radius(15)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: responsive.sw(16)),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<int>(
           value: value,
@@ -430,7 +491,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
                 item['name'],
                 style: TextStyle(
                   color: item['id'] == 0 ? Colors.grey.shade500 : Colors.black,
-                  fontSize: 14,
+                  fontSize: responsive.sp(14),
                 ),
               ),
             );
@@ -441,11 +502,11 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     );
   }
 
-  Widget _buildDatePickerField() {
+  Widget _buildDatePickerField(ResponsiveHelper responsive) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(responsive.radius(15)),
       ),
       child: InkWell(
         onTap: () async {
@@ -468,7 +529,10 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(
+            horizontal: responsive.sw(16),
+            vertical: responsive.sh(12),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -480,13 +544,13 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
                   color: _selectedDate == null
                       ? Colors.grey.shade400
                       : Colors.black,
-                  fontSize: 14,
+                  fontSize: responsive.sp(14),
                 ),
               ),
               Icon(
                 Icons.calendar_today_outlined,
                 color: Colors.grey.shade400,
-                size: 20,
+                size: responsive.iconSize(20),
               ),
             ],
           ),
@@ -495,24 +559,28 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
     );
   }
 
-  Widget _buildLocationField() {
+  Widget _buildLocationField(ResponsiveHelper responsive) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(responsive.radius(15)),
       ),
       child: Row(
         children: [
           Expanded(
             child: TextFormField(
               controller: _locationController,
+              style: TextStyle(fontSize: responsive.sp(14)),
               decoration: InputDecoration(
                 hintText: "Enter location",
-                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                hintStyle: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: responsive.sp(14),
+                ),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: responsive.sw(16),
+                  vertical: responsive.sh(12),
                 ),
               ),
             ),
@@ -521,7 +589,7 @@ class _CreateCallsheetScreenState extends State<CreateCallsheetScreen> {
             icon: Icon(
               Icons.location_on,
               color: Colors.blue.shade600,
-              size: 24,
+              size: responsive.iconSize(24),
             ),
             onPressed: _getCurrentLocation,
           ),

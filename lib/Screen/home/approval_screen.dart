@@ -127,6 +127,9 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     if (!_isApproved) {
       return Scaffold(
         body: Container(
@@ -138,33 +141,33 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
               children: [
                 // Custom App Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.015,
                   ),
                   child: Row(
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.of(context).pop(),
                         child: Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(screenWidth * 0.02),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(screenWidth * 0.025),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.arrow_back_ios_new,
                             color: Colors.white,
-                            size: 20,
+                            size: screenWidth * 0.05,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      const Text(
+                      SizedBox(width: screenWidth * 0.04),
+                      Text(
                         'Approval Status',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: screenWidth * 0.05,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -175,7 +178,7 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                 Expanded(
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24.0),
+                      padding: EdgeInsets.all(screenWidth * 0.06),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -183,8 +186,8 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                         children: [
                           // Animated waiting icon container
                           Container(
-                            width: 120,
-                            height: 120,
+                            width: screenWidth * 0.3,
+                            height: screenWidth * 0.3,
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.15),
                               shape: BoxShape.circle,
@@ -195,78 +198,78 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                             ),
                             child: Center(
                               child: _isLoading
-                                  ? const SizedBox(
-                                      width: 50,
-                                      height: 50,
+                                  ? SizedBox(
+                                      width: screenWidth * 0.125,
+                                      height: screenWidth * 0.125,
                                       child: CircularProgressIndicator(
                                         color: Colors.white,
                                         strokeWidth: 3,
                                       ),
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.hourglass_top_rounded,
-                                      size: 60,
+                                      size: screenWidth * 0.15,
                                       color: Colors.white,
                                     ),
                             ),
                           ),
-                          const SizedBox(height: 32),
+                          SizedBox(height: screenHeight * 0.04),
                           // Status badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.04,
+                              vertical: screenHeight * 0.01,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.orange.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(screenWidth * 0.05),
                               border: Border.all(
                                 color: Colors.orange.withOpacity(0.5),
                                 width: 1,
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.pending_outlined,
                                   color: Colors.orange,
-                                  size: 18,
+                                  size: screenWidth * 0.045,
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: screenWidth * 0.02),
                                 Text(
                                   'Pending Approval',
                                   style: TextStyle(
                                     color: Colors.orange,
-                                    fontSize: 14,
+                                    fontSize: screenWidth * 0.035,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: screenHeight * 0.03),
                           // Main message
-                          const Text(
+                          Text(
                             'Waiting for Confirmation',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: screenWidth * 0.06,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: screenHeight * 0.015),
                           Text(
                             'Your approval request has been sent to the Production Manager. Please wait until they confirm your approval.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: screenWidth * 0.0375,
                               color: Colors.white.withOpacity(0.8),
                               height: 1.5,
                             ),
                           ),
-                          const SizedBox(height: 40),
+                          SizedBox(height: screenHeight * 0.05),
                           // Refresh button
                           SizedBox(
                             width: double.infinity,
@@ -277,12 +280,12 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                 foregroundColor: AppColors.primaryDark,
                                 disabledBackgroundColor: Colors.white
                                     .withOpacity(0.5),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 16,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.08,
+                                  vertical: screenHeight * 0.02,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(screenWidth * 0.03),
                                 ),
                                 elevation: 0,
                               ),
@@ -291,28 +294,28 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                                 children: [
                                   if (_isLoading) ...[
                                     SizedBox(
-                                      width: 20,
-                                      height: 20,
+                                      width: screenWidth * 0.05,
+                                      height: screenWidth * 0.05,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                         color: AppColors.primaryDark,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
-                                    const Text(
+                                    SizedBox(width: screenWidth * 0.03),
+                                    Text(
                                       'Checking...',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: screenWidth * 0.04,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ] else ...[
-                                    const Icon(Icons.refresh_rounded, size: 22),
-                                    const SizedBox(width: 10),
-                                    const Text(
+                                    Icon(Icons.refresh_rounded, size: screenWidth * 0.055),
+                                    SizedBox(width: screenWidth * 0.025),
+                                    Text(
                                       'Check Status',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: screenWidth * 0.04,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -321,21 +324,21 @@ class _ApprovalScreenState extends State<ApprovalScreen> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: screenHeight * 0.02),
                           // Info text
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
                                 Icons.info_outline_rounded,
-                                size: 16,
+                                size: screenWidth * 0.04,
                                 color: Colors.white.withOpacity(0.6),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: screenWidth * 0.015),
                               Text(
                                 'Tap to refresh and check approval status',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: screenWidth * 0.03,
                                   color: Colors.white.withOpacity(0.6),
                                 ),
                               ),

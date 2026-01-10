@@ -17,7 +17,7 @@ int? _safeInt(dynamic value) {
 }
 
 // Helper to check for session expiration and navigate if needed
-void _checkSessionExpiration(String responseBody) {
+void checkSessionExpiration(String responseBody) {
   try {
     final decoded = jsonDecode(responseBody);
     if (decoded is Map && decoded['errordescription'] == "Session Expired") {
@@ -136,7 +136,7 @@ Future<Map<String, dynamic>> createCallSheetApi({
 
     print('🚀 createCallSheetApi Response: ${createcallsheetresponse.body}');
 
-    _checkSessionExpiration(createcallsheetresponse.body);
+    checkSessionExpiration(createcallsheetresponse.body);
 
     return {
       'statusCode': createcallsheetresponse.statusCode,
@@ -228,7 +228,7 @@ Future<Map<String, dynamic>> attendencereportapi({
       '🚗 attendencereportapi Status API Response Body: ${tripstatusresponse.body}',
     );
 
-    _checkSessionExpiration(tripstatusresponse.body);
+    checkSessionExpiration(tripstatusresponse.body);
 
     return {
       'statusCode': tripstatusresponse.statusCode,
@@ -279,7 +279,7 @@ Future<Map<String, dynamic>> fetchcallsheetapi({required int projectid}) async {
       '🚗 fetchcallsheetapi Status API Response Body: ${fetchcallsheetapiresponse.body}',
     );
 
-    _checkSessionExpiration(fetchcallsheetapiresponse.body);
+    checkSessionExpiration(fetchcallsheetapiresponse.body);
 
     return {
       'statusCode': fetchcallsheetapiresponse.statusCode,
@@ -327,7 +327,7 @@ Future<Map<String, dynamic>> forouttimelookupapi() async {
       '🚗 fetchcallsheetapi Status API Response Body: ${forouttimelookupapiresponse.body}',
     );
 
-    _checkSessionExpiration(forouttimelookupapiresponse.body);
+    checkSessionExpiration(forouttimelookupapiresponse.body);
 
     return {
       'statusCode': forouttimelookupapiresponse.statusCode,
@@ -391,7 +391,7 @@ Future<Map<String, dynamic>> closecallsheetapi({
       '🚗 closecallsheetapi Status API Response Body: ${closecallsheetapiresponse.body}',
     );
 
-    _checkSessionExpiration(closecallsheetapiresponse.body);
+    checkSessionExpiration(closecallsheetapiresponse.body);
 
     // Try to parse the response body to detect logical success, since
     // some endpoints return HTTP 200 even when the operation failed.
@@ -476,7 +476,7 @@ Future<Map<String, dynamic>> raiserequestapi(
     print(
 
         '🚗 raiserequestapi Status API Response Body: ${raiserequestresponse.body}');
-_checkSessionExpiration(raiserequestresponse.body);
+checkSessionExpiration(raiserequestresponse.body);
   return {
       'statusCode': raiserequestresponse.statusCode,
       'body': raiserequestresponse.body,
@@ -521,7 +521,7 @@ Future<Map<String, dynamic>> shiftlistshowcaseapi({
       '🚗 shiftlistshowcaseapiresponse Status API Response Body: ${shiftlistshowcaseapiresponse.body}',
     );
 
-    _checkSessionExpiration(shiftlistshowcaseapiresponse.body);
+    checkSessionExpiration(shiftlistshowcaseapiresponse.body);
 
     return {
       'statusCode': shiftlistshowcaseapiresponse.statusCode,

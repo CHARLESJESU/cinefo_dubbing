@@ -264,24 +264,31 @@ class _SqlitelistState extends State<Sqlitelist> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color(0xFF355E8C),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: screenWidth * 0.065),
           onPressed: () => Navigator.pop(context, true),
           tooltip: 'Back',
         ),
         title: Text(
           _viewMode == 0 ? 'SQLite Login Data' : 'SQLite Intime Data',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: screenWidth * 0.045,
+          ),
         ),
         backgroundColor: Color(0xFF355E8C),
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.swap_horiz, color: Colors.white),
+            icon: Icon(Icons.swap_horiz, color: Colors.white, size: screenWidth * 0.065),
             onPressed: () {
               setState(() {
                 _viewMode = (_viewMode + 1) % 2;
@@ -290,7 +297,7 @@ class _SqlitelistState extends State<Sqlitelist> {
             tooltip: _viewMode == 0 ? 'Show Intime Data' : 'Show Login Data',
           ),
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
+            icon: Icon(Icons.refresh, color: Colors.white, size: screenWidth * 0.065),
             onPressed: () async {
               if (_viewMode == 0) {
                 await _fetchLoginData();
@@ -302,7 +309,7 @@ class _SqlitelistState extends State<Sqlitelist> {
           ),
           if (_viewMode == 1)
             IconButton(
-              icon: Icon(Icons.clear_all, color: Colors.white),
+              icon: Icon(Icons.clear_all, color: Colors.white, size: screenWidth * 0.065),
               onPressed: _clearAllData,
               tooltip: 'Clear All Data',
             ),
@@ -314,10 +321,13 @@ class _SqlitelistState extends State<Sqlitelist> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 16),
+                  SizedBox(height: screenHeight * 0.02),
                   Text(
                     'Loading ${_viewMode == 0 ? 'login' : 'intime'} data...',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: screenWidth * 0.04,
+                    ),
                   ),
                 ],
               ),
@@ -329,26 +339,26 @@ class _SqlitelistState extends State<Sqlitelist> {
                 children: [
                   Icon(
                     Icons.storage,
-                    size: 64,
+                    size: screenWidth * 0.16,
                     color: Colors.white.withOpacity(0.6),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: screenHeight * 0.02),
                   Text(
                     _viewMode == 0 ? 'No login data found' : 'No intime data found',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: screenWidth * 0.045,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: screenHeight * 0.01),
                   Text(
                     _viewMode == 0
                         ? 'Login through the app to see data here'
                         : 'Mark attendance to see intime data here',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
+                      fontSize: screenWidth * 0.035,
                     ),
                   ),
                 ],
@@ -357,7 +367,7 @@ class _SqlitelistState extends State<Sqlitelist> {
           : Column(
               children: [
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(screenWidth * 0.04),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -366,7 +376,7 @@ class _SqlitelistState extends State<Sqlitelist> {
                         '${_viewMode == 0 ? _loginData.length : _intimeData.length}',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: screenWidth * 0.04,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -375,12 +385,12 @@ class _SqlitelistState extends State<Sqlitelist> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
                     itemCount: _viewMode == 0 ? _loginData.length : _intimeData.length,
                     itemBuilder: (context, index) {
                       final item = _viewMode == 0 ? _loginData[index] : _intimeData[index];
                       return Card(
-                        margin: EdgeInsets.only(bottom: 12),
+                        margin: EdgeInsets.only(bottom: screenHeight * 0.015),
                         elevation: 4,
                         child: ExpansionTile(
                           title: Text(
@@ -389,7 +399,7 @@ class _SqlitelistState extends State<Sqlitelist> {
                                 : (item['name'] ?? 'No Name'),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: screenWidth * 0.04,
                             ),
                           ),
                           subtitle: _viewMode == 0
@@ -599,25 +609,31 @@ class _SqlitelistState extends State<Sqlitelist> {
   }
 
   Widget _buildDetailRow(String label, String? value) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 120,
+            width: screenWidth * 0.3,
             child: Text(
               '$label:',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[700],
+                fontSize: screenWidth * 0.035,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value ?? 'N/A',
-              style: TextStyle(color: Colors.black87),
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: screenWidth * 0.035,
+              ),
             ),
           ),
         ],

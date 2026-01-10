@@ -149,48 +149,54 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.025),
 
                 // ---------- TITLE ----------
-                const Text(
+                Text(
                   "Forget Password",
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: screenWidth * 0.06,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryLight,
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                SizedBox(height: screenHeight * 0.01),
 
                 // ---------- SUBTITLE ----------
-                const Text(
+                Text(
                   "Enter your registered Phone Number below",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.035,
+                    color: Colors.grey,
+                  ),
                 ),
 
-                const SizedBox(height: 25),
+                SizedBox(height: screenHeight * 0.03),
 
                 // ---------- PHONE LABEL ----------
-                const Text(
+                Text(
                   "Phone",
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: screenWidth * 0.04,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryLight,
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                SizedBox(height: screenHeight * 0.012),
 
                 // ---------- PHONE TEXT FIELD ----------
                 TextField(
@@ -198,39 +204,45 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                   keyboardType: TextInputType.phone,
                   maxLength: 10,
                   onChanged: validatePhoneNumber,
+                  style: TextStyle(fontSize: screenWidth * 0.04),
                   decoration: InputDecoration(
                     hintText: "Enter your phone number",
+                    hintStyle: TextStyle(fontSize: screenWidth * 0.038),
                     filled: true,
                     fillColor: Colors.yellow.shade50,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.04,
+                      vertical: screenHeight * 0.017,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(screenWidth * 0.03),
                       borderSide: BorderSide.none,
                     ),
                     errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(screenWidth * 0.03),
                       borderSide: const BorderSide(color: Colors.red),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(screenWidth * 0.03),
                       borderSide: const BorderSide(color: Colors.red, width: 2),
                     ),
                     errorText: phoneError,
+                    errorStyle: TextStyle(fontSize: screenWidth * 0.033),
                     counterText: "", // Hide the character counter
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                SizedBox(height: screenHeight * 0.012),
 
                 // ---------- SIGN IN LINK ----------
                 Row(
                   children: [
-                    const Text(
+                    Text(
                       "Remember the password?",
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: screenWidth * 0.035,
+                      ),
                     ),
                     TextButton(
                       onPressed: () {
@@ -241,30 +253,31 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                           ),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         "Sign in",
                         style: TextStyle(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
+                          fontSize: screenWidth * 0.035,
                         ),
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 40),
+                SizedBox(height: screenHeight * 0.05),
 
                 // ---------- GRADIENT SUBMIT BUTTON ----------
                 Container(
                   width: double.infinity,
-                  height: 55,
+                  height: screenHeight * 0.065,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: AppColors.primaryGradient,
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(screenWidth * 0.03),
                   ),
                   child: ElevatedButton(
                     onPressed: isLoading
@@ -276,13 +289,13 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                       backgroundColor: Colors.transparent,
                       shadowColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(screenWidth * 0.03),
                       ),
                     ),
                     child: isLoading
                         ? SizedBox(
-                            width: 24,
-                            height: 24,
+                            width: screenWidth * 0.06,
+                            height: screenWidth * 0.06,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -290,18 +303,18 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                               ),
                             ),
                           )
-                        : const Text(
+                        : Text(
                             "Submit",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18,
+                              fontSize: screenWidth * 0.045,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: screenHeight * 0.025),
               ], // children
             ), // Column
           ), // Padding

@@ -35,6 +35,9 @@ class _RoutescreenforDubbingInchargeState
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color(0xFF355E8C),
 
@@ -42,11 +45,17 @@ class _RoutescreenforDubbingInchargeState
 
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF355E8C),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Callsheet'),
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
+            icon: Icon(Icons.home, size: screenWidth * 0.065),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list, size: screenWidth * 0.065),
+            label: 'Callsheet',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month, size: screenWidth * 0.065),
             label: 'Reports',
           ),
         ],
@@ -56,6 +65,9 @@ class _RoutescreenforDubbingInchargeState
         unselectedItemColor: Colors.white,
         showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: screenWidth * 0.035,
+        unselectedFontSize: screenWidth * 0.032,
+        iconSize: screenWidth * 0.065,
       ),
     );
   }

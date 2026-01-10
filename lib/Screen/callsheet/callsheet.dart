@@ -6,6 +6,35 @@ import '../../ApiCalls/apicall.dart' as apicalls;
 import '../../variables.dart';
 import 'CreateCallsheetScreen.dart';
 
+// Responsive helper class
+class ResponsiveHelper {
+  final BuildContext context;
+  late double screenWidth;
+  late double screenHeight;
+
+  ResponsiveHelper(this.context) {
+    screenWidth = MediaQuery.of(context).size.width;
+    screenHeight = MediaQuery.of(context).size.height;
+  }
+
+  static const double baseWidth = 393.0;
+  static const double baseHeight = 852.0;
+
+  double wp(double percentage) => screenWidth * percentage / 100;
+  double hp(double percentage) => screenHeight * percentage / 100;
+  double sw(double size) => size * screenWidth / baseWidth;
+  double sh(double size) => size * screenHeight / baseHeight;
+  double sp(double size) {
+    double scaleFactor = screenWidth / baseWidth;
+    return (size * scaleFactor).clamp(size * 0.8, size * 1.3);
+  }
+
+  double radius(double size) => sw(size);
+  double iconSize(double size) => sw(size).clamp(size * 0.8, size * 1.5);
+  bool get isSmallPhone => screenWidth < 360;
+  bool get isTablet => screenWidth >= 600;
+}
+
 class CallsheetScreen extends StatefulWidget {
   const CallsheetScreen({super.key});
 
@@ -112,31 +141,38 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = ResponsiveHelper(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF2B5682),
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
+        toolbarHeight: responsive.sh(56),
+        title: Text(
           "CallSheet",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 22,
+            fontSize: responsive.sp(22),
           ),
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: responsive.sw(16)),
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
                   color: Colors.white.withOpacity(0.8),
-                  width: 1.5,
+                  width: responsive.sw(1.5),
                 ),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(responsive.radius(10)),
               ),
               child: IconButton(
-                icon: const Icon(Icons.add, color: Colors.white, size: 28),
+                icon: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                  size: responsive.iconSize(28),
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -153,30 +189,37 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.white))
+          ? Center(
+              child: SizedBox(
+                width: responsive.sw(40),
+                height: responsive.sw(40),
+                child: const CircularProgressIndicator(color: Colors.white),
+              ),
+            )
           : SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: responsive.sw(20)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 10),
-                    const Text(
+                    SizedBox(height: responsive.sh(10)),
+                    Text(
                       "Today's Schedule",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: responsive.sp(20),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: responsive.sh(30)),
                     if (callSheetData.isEmpty)
-                      _buildEmptyState()
+                      _buildEmptyState(responsive)
                     else
                       ...callSheetData.map(
-                        (callSheet) => _buildCallSheetCard(context, callSheet),
+                        (callSheet) =>
+                            _buildCallSheetCard(context, callSheet, responsive),
                       ),
-                    const SizedBox(height: 100),
+                    SizedBox(height: responsive.hp(12)),
                   ],
                 ),
               ),
@@ -184,55 +227,58 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ResponsiveHelper responsive) {
     return Center(
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+        padding: EdgeInsets.symmetric(
+          vertical: responsive.sh(40),
+          horizontal: responsive.sw(20),
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
+          borderRadius: BorderRadius.circular(responsive.radius(25)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              blurRadius: responsive.sw(10),
+              offset: Offset(0, responsive.sh(5)),
             ),
           ],
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Align(
+            Align(
               alignment: Alignment.topLeft,
               child: Text(
                 "Callsheet",
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: responsive.sp(18),
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2B5682),
+                  color: const Color(0xFF2B5682),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: responsive.sh(20)),
             Icon(
               Icons.description_outlined,
-              size: 80,
+              size: responsive.iconSize(80),
               color: Colors.grey.withOpacity(0.5),
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: responsive.sh(20)),
+            Text(
               "No call sheet available",
               style: TextStyle(
-                fontSize: 18,
+                fontSize: responsive.sp(18),
                 fontWeight: FontWeight.bold,
                 color: Colors.grey,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: responsive.sh(8)),
+            Text(
               "Create a call sheet to see it here",
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(fontSize: responsive.sp(14), color: Colors.grey),
             ),
           ],
         ),
@@ -243,6 +289,7 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
   Widget _buildCallSheetCard(
     BuildContext context,
     Map<String, dynamic> callSheet,
+    ResponsiveHelper responsive,
   ) {
     final String callSheetId =
         (callSheet['callSheetId'] ??
@@ -301,16 +348,16 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
         ).then((value) => _initializeAndCallAPI());
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.only(bottom: responsive.sh(12)),
+        padding: EdgeInsets.all(responsive.sw(16)),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(responsive.radius(12)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              blurRadius: responsive.sw(4),
+              offset: Offset(0, responsive.sh(2)),
             ),
           ],
           border: Border.all(color: Colors.grey.withOpacity(0.2), width: 1),
@@ -319,7 +366,10 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: responsive.sw(12),
+                vertical: responsive.sh(8),
+              ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
@@ -329,33 +379,34 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
                     const Color(0xFF2E4B73).withOpacity(0.1),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(responsive.radius(8)),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       "Call Sheet #$callSheetNo",
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Color(0xFF2B5682),
+                        fontSize: responsive.sp(16),
+                        color: const Color(0xFF2B5682),
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: responsive.sw(8),
+                      vertical: responsive.sh(4),
                     ),
                     decoration: BoxDecoration(
                       color: _getStatusColor(status).withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(responsive.radius(6)),
                     ),
                     child: Text(
                       status,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: responsive.sp(12),
                         fontWeight: FontWeight.w600,
                         color: _getStatusColor(status),
                       ),
@@ -364,15 +415,19 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: responsive.sh(12)),
             Row(
               children: [
-                Icon(Icons.movie, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                const Text(
+                Icon(
+                  Icons.movie,
+                  size: responsive.iconSize(16),
+                  color: Colors.grey[600],
+                ),
+                SizedBox(width: responsive.sw(4)),
+                Text(
                   "Project: ",
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: responsive.sp(14),
                     color: Colors.grey,
                     fontWeight: FontWeight.w500,
                   ),
@@ -381,49 +436,62 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
                   child: Text(
                     projectName,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: responsive.sp(14),
                       color: Colors.grey[700],
                       fontWeight: FontWeight.w600,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: responsive.sh(8)),
             Row(
               children: [
-                Icon(Icons.badge, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
+                Icon(
+                  Icons.badge,
+                  size: responsive.iconSize(16),
+                  color: Colors.grey[600],
+                ),
+                SizedBox(width: responsive.sw(4)),
                 Text(
                   "ID: $callSheetId",
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: responsive.sp(14),
                     color: Colors.grey[700],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const Spacer(),
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
+                Icon(
+                  Icons.calendar_today,
+                  size: responsive.iconSize(16),
+                  color: Colors.grey[600],
+                ),
+                SizedBox(width: responsive.sw(4)),
                 Text(
                   date,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: responsive.sp(14),
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF355E8C),
+                    color: const Color(0xFF355E8C),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: responsive.sh(8)),
             Row(
               children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
-                const SizedBox(width: 4),
-                const Text(
+                Icon(
+                  Icons.access_time,
+                  size: responsive.iconSize(16),
+                  color: Colors.grey[600],
+                ),
+                SizedBox(width: responsive.sw(4)),
+                Text(
                   "Shift: ",
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: responsive.sp(14),
                     color: Colors.grey,
                     fontWeight: FontWeight.w500,
                   ),
@@ -432,10 +500,11 @@ class _CallsheetScreenState extends State<CallsheetScreen> {
                   child: Text(
                     shift,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: responsive.sp(14),
                       color: Colors.grey[700],
                       fontWeight: FontWeight.w500,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],

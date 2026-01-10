@@ -175,44 +175,59 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          padding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.06,
+            vertical: screenHeight * 0.025,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.025),
 
               /// Title
-              const Text(
+              Text(
                 "Set New Password",
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: screenWidth * 0.055,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primaryLight,
                 ),
               ),
 
-              const SizedBox(height: 6),
+              SizedBox(height: screenHeight * 0.008),
 
               /// Subtitle
-              const Text(
+              Text(
                 "Enter a different password than the previous",
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: screenWidth * 0.035,
+                  color: Colors.grey,
+                ),
               ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: screenHeight * 0.035),
 
               /// Old Password TextField
               TextField(
                 controller: oldPasswordController,
                 obscureText: _obscureOldPassword,
+                style: TextStyle(fontSize: screenWidth * 0.04),
                 decoration: InputDecoration(
                   labelText: "Old Password",
+                  labelStyle: TextStyle(fontSize: screenWidth * 0.038),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.018,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(screenWidth * 0.025),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -220,6 +235,7 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                           ? Icons.visibility_off
                           : Icons.visibility,
                       color: Colors.grey,
+                      size: screenWidth * 0.055,
                     ),
                     onPressed: () {
                       setState(() {
@@ -230,16 +246,22 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.025),
 
               /// New Password TextField
               TextField(
                 controller: newPasswordController,
                 obscureText: _obscureNewPassword,
+                style: TextStyle(fontSize: screenWidth * 0.04),
                 decoration: InputDecoration(
                   labelText: "New Password",
+                  labelStyle: TextStyle(fontSize: screenWidth * 0.038),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.018,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(screenWidth * 0.025),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -247,6 +269,7 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                           ? Icons.visibility_off
                           : Icons.visibility,
                       color: Colors.grey,
+                      size: screenWidth * 0.055,
                     ),
                     onPressed: () {
                       setState(() {
@@ -257,16 +280,22 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.025),
 
               /// Confirm Password TextField
               TextField(
                 controller: confirmPasswordController,
                 obscureText: _obscureConfirmPassword,
+                style: TextStyle(fontSize: screenWidth * 0.04),
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
+                  labelStyle: TextStyle(fontSize: screenWidth * 0.038),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.018,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(screenWidth * 0.025),
                   ),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -274,6 +303,7 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                           ? Icons.visibility_off
                           : Icons.visibility,
                       color: Colors.grey,
+                      size: screenWidth * 0.055,
                     ),
                     onPressed: () {
                       setState(() {
@@ -285,26 +315,32 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
               ),
 
               if (passwordError != null) ...[
-                const SizedBox(height: 8),
-                Text(passwordError!, style: const TextStyle(color: Colors.red)),
+                SizedBox(height: screenHeight * 0.01),
+                Text(
+                  passwordError!,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: screenWidth * 0.035,
+                  ),
+                ),
               ],
 
-              const SizedBox(height: 40),
+              SizedBox(height: screenHeight * 0.05),
 
               /// Bottom Image
-              const SizedBox(height: 30),
+              SizedBox(height: screenHeight * 0.035),
 
               /// Reset Password Button (Gradient)
               Container(
                 width: double.infinity,
-                height: 55,
+                height: screenHeight * 0.065,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: AppColors.primaryGradient,
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(screenWidth * 0.03),
                 ),
                 child: ElevatedButton(
                   onPressed: isLoading
@@ -318,13 +354,13 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(screenWidth * 0.03),
                     ),
                   ),
                   child: isLoading
                       ? SizedBox(
-                          width: 24,
-                          height: 24,
+                          width: screenWidth * 0.06,
+                          height: screenWidth * 0.06,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -332,10 +368,10 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                             ),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Change Password",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: screenWidth * 0.04,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -343,7 +379,7 @@ class _ChangepasswordScreenState extends State<ChangepasswordScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: screenHeight * 0.025),
             ],
           ),
         ),

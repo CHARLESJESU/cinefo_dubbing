@@ -166,28 +166,38 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Select Project',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: screenWidth * 0.05,
+          ),
         ),
         backgroundColor: AppColors.primaryLight,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(
+          color: Colors.white,
+          size: screenWidth * 0.065,
+        ),
       ),
       body: Column(
         children: [
           // // Search bar
           // Padding(
-          //   padding: const EdgeInsets.all(16.0),
+          //   padding: EdgeInsets.all(screenWidth * 0.04),
           //   child: TextField(
           //     onChanged: _filterProjects,
           //     decoration: InputDecoration(
           //       hintText: 'Search by project name or production house...',
           //       prefixIcon: const Icon(Icons.search),
           //       border: OutlineInputBorder(
-          //         borderRadius: BorderRadius.circular(8),
+          //         borderRadius: BorderRadius.circular(screenWidth * 0.02),
           //       ),
           //       filled: true,
           //       fillColor: Colors.grey[100],
@@ -211,36 +221,46 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                       children: [
                         Icon(
                           Icons.error_outline,
-                          size: 64,
+                          size: screenWidth * 0.16,
                           color: Colors.red.shade300,
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: screenHeight * 0.02),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.08,
+                          ),
                           child: Text(
                             _errorMessage!,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: screenWidth * 0.04,
                               color: Colors.red.shade700,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: screenHeight * 0.03),
                         ElevatedButton.icon(
                           onPressed: _fetchData,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
+                          icon: Icon(
+                            Icons.refresh,
+                            size: screenWidth * 0.05,
+                          ),
+                          label: Text(
+                            'Retry',
+                            style: TextStyle(fontSize: screenWidth * 0.04),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryLight,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.06,
+                              vertical: screenHeight * 0.015,
                             ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(
+                                screenWidth * 0.02,
+                              ),
                             ),
                           ),
                         ),
@@ -254,16 +274,16 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                       children: [
                         Icon(
                           Icons.inbox_outlined,
-                          size: 64,
+                          size: screenWidth * 0.16,
                           color: AppColors.primaryLight.withOpacity(0.5),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: screenHeight * 0.02),
                         Text(
                           searchQuery.isEmpty
                               ? 'No projects available'
                               : 'No projects found',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.04,
                             color: Colors.black54,
                             fontWeight: FontWeight.w500,
                           ),
@@ -301,44 +321,62 @@ class ProjectListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(
+        horizontal: screenWidth * 0.04,
+        vertical: screenHeight * 0.01,
+      ),
       elevation: 2,
       shadowColor: AppColors.primaryLight.withOpacity(0.3),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(screenWidth * 0.03),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(screenWidth * 0.03),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(screenWidth * 0.03),
             border: Border(
-              left: BorderSide(color: AppColors.primaryLight, width: 4),
+              left: BorderSide(
+                color: AppColors.primaryLight,
+                width: screenWidth * 0.01,
+              ),
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            padding: EdgeInsets.symmetric(
+              horizontal: screenWidth * 0.05,
+              vertical: screenHeight * 0.02,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   project.projectName,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.045,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryDark,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: screenHeight * 0.01),
                 Row(
                   children: [
-                    Icon(Icons.domain, size: 16, color: AppColors.primaryLight),
-                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.domain,
+                      size: screenWidth * 0.04,
+                      color: AppColors.primaryLight,
+                    ),
+                    SizedBox(width: screenWidth * 0.02),
                     Expanded(
                       child: Text(
                         project.productionHouse,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.035,
                           color: Colors.black54,
                           fontWeight: FontWeight.w500,
                         ),
@@ -348,7 +386,7 @@ class ProjectListItem extends StatelessWidget {
                     ),
                     Icon(
                       Icons.arrow_forward_ios,
-                      size: 14,
+                      size: screenWidth * 0.035,
                       color: AppColors.primaryLight.withOpacity(0.5),
                     ),
                   ],

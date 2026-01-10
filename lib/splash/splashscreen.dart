@@ -138,6 +138,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Color(0xFF2B5682),
       body: SafeArea(
@@ -150,15 +153,15 @@ class _SplashScreenState extends State<SplashScreen> {
                   children: [
                     // App Logo
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: screenWidth * 0.3,
+                      height: screenWidth * 0.3,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 15,
-                            offset: Offset(0, 8),
+                            blurRadius: screenWidth * 0.04,
+                            offset: Offset(0, screenHeight * 0.01),
                           ),
                         ],
                       ),
@@ -167,20 +170,20 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
                     ),
 
-                    SizedBox(height: 30),
+                    SizedBox(height: screenHeight * 0.04),
 
                     // App Title
                     Text(
                       'Dubbing App',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: screenWidth * 0.07,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         letterSpacing: 1.2,
                       ),
                     ),
 
-                    SizedBox(height: 50),
+                    SizedBox(height: screenHeight * 0.06),
                   ],
                 ),
               ),
@@ -188,11 +191,11 @@ class _SplashScreenState extends State<SplashScreen> {
 
             // Version info
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: EdgeInsets.only(bottom: screenHeight * 0.025),
               child: Text(
                 'v.4.0.2',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: screenWidth * 0.035,
                   color: Colors.white.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w400,
                 ),

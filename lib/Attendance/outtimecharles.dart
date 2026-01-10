@@ -145,14 +145,27 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("Out-time", style: TextStyle(color: Colors.black)),
+        title: Text(
+          "Out-time",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: screenWidth * 0.045,
+          ),
+        ),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+            size: screenWidth * 0.065,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -166,10 +179,13 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(debugMessage),
+                  Text(
+                    debugMessage,
+                    style: TextStyle(fontSize: screenWidth * 0.035),
+                  ),
                   // Numeric-only, hidden (opacity 0) RFID text box remains for compatibility
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                     child: Opacity(
                       opacity: 0.0,
                       child: TextField(
@@ -187,8 +203,13 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                       ),
                     ),
                   ),
-                  Image.asset('assets/markattendance.png'),
-                  const SizedBox(height: 20),
+                  Image.asset(
+                    'assets/markattendance.png',
+                    width: screenWidth * 0.6,
+                    height: screenWidth * 0.6,
+                    fit: BoxFit.contain,
+                  ),
+                  SizedBox(height: screenHeight * 0.025),
                   Consumer<NFCNotifier>(
                     builder: (context, provider, _) {
                       // Provider-originated RFID should still fill the field when available
@@ -235,11 +256,12 @@ class _IntimeScreenBodyState extends State<_IntimeScreenBody> {
                       }
 
                       if (provider.isProcessing) {
-                        return const Text(
+                        return Text(
                           'Please hold the card near',
                           style: TextStyle(
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
+                            fontSize: screenWidth * 0.04,
                           ),
                         );
                       }
