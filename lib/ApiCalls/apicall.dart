@@ -26,6 +26,7 @@ void checkSessionExpiration(String responseBody) {
       );
     }
   } catch (e) {
+        print("❌ Error decoding JSON: $e");
     // If JSON parsing fails, ignore
   }
 }
